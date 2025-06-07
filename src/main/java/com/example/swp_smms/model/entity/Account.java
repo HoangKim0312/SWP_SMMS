@@ -22,13 +22,10 @@ public class Account {
     
     @Column(name = "password")
     private String password;
-    
+
     @ManyToOne
-    @JoinColumn(name = "role_id", referencedColumnName = "role_id", insertable = false, updatable = false)
+    @JoinColumn(name = "role_id")
     private Role role;
-    
-    @Column(name = "role_id")
-    private String roleId;
     
     @Column(name = "full_name")
     private String fullName;
@@ -41,17 +38,13 @@ public class Account {
     
     @Column(name = "phone")
     private String phone;
-    
+
     @ManyToOne
-    @JoinColumn(name = "class_id", referencedColumnName = "class_id", insertable = false, updatable = false)
+    @JoinColumn(name = "class_id")
     private Class clazz;
-    
-    @Column(name = "class_id")
-    private String classId;
-    
-    // Reverse relationships
-    @OneToMany(mappedBy = "student")
-    private List<MedicalProfile> medicalProfiles;
+
+    @OneToOne(mappedBy = "student")
+    private MedicalProfile medicalProfiles;
     
     @OneToMany(mappedBy = "student")
     private List<HealthEvent> healthEvents;
