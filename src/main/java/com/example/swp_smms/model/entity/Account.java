@@ -1,0 +1,94 @@
+package com.example.swp_smms.model.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "Account")
+public class Account {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "account_id")
+    private Long accountId;
+    
+    @Column(name = "username", unique = true)
+    private String username;
+    
+    @Column(name = "password")
+    private String password;
+    
+    @ManyToOne
+    @JoinColumn(name = "role_id", referencedColumnName = "role_id", insertable = false, updatable = false)
+    private Role role;
+    
+    @Column(name = "role_id")
+    private String roleId;
+    
+    @Column(name = "full_name")
+    private String fullName;
+    
+    @Column(name = "dob")
+    private String dob;
+    
+    @Column(name = "gender")
+    private String gender;
+    
+    @Column(name = "phone")
+    private String phone;
+    
+    @ManyToOne
+    @JoinColumn(name = "class_id", referencedColumnName = "class_id", insertable = false, updatable = false)
+    private Class clazz;
+    
+    @Column(name = "class_id")
+    private String classId;
+    
+    // Reverse relationships
+    @OneToMany(mappedBy = "student")
+    private List<MedicalProfile> medicalProfiles;
+    
+    @OneToMany(mappedBy = "student")
+    private List<HealthEvent> healthEvents;
+    
+    @OneToMany(mappedBy = "nurse")
+    private List<HealthEvent> nurseHealthEvents;
+    
+    @OneToMany(mappedBy = "student")
+    private List<VaccinationRecord> vaccinationRecords;
+    
+    @OneToMany(mappedBy = "nurse")
+    private List<VaccinationRecord> nurseVaccinationRecords;
+    
+    @OneToMany(mappedBy = "student")
+    private List<HealthCheckRecord> healthCheckRecords;
+    
+    @OneToMany(mappedBy = "nurse")
+    private List<HealthCheckRecord> nurseHealthCheckRecords;
+    
+    @OneToMany(mappedBy = "student")
+    private List<MedicationSent> medicationSents;
+    
+    @OneToMany(mappedBy = "student")
+    private List<StudentParent> studentParents;
+    
+    @OneToMany(mappedBy = "parent")
+    private List<StudentParent> parentStudents;
+    
+    @OneToMany(mappedBy = "student")
+    private List<HealthCheckConfirmation> healthCheckConfirmations;
+    
+    @OneToMany(mappedBy = "parent")
+    private List<HealthCheckConfirmation> parentHealthCheckConfirmations;
+    
+    @OneToMany(mappedBy = "student")
+    private List<VaccinationConfirmation> vaccinationConfirmations;
+    
+    @OneToMany(mappedBy = "parent")
+    private List<VaccinationConfirmation> parentVaccinationConfirmations;
+} 
