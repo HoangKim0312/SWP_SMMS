@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -13,9 +14,9 @@ import java.util.List;
 @Table(name = "Account")
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "account_id")
-    private Long accountId;
+    private UUID accountId;
     
     @Column(name = "username", unique = true)
     private String username;
