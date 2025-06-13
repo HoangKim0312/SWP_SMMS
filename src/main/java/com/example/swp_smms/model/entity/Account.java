@@ -21,6 +21,9 @@ public class Account {
     @Column(name = "username", unique = true)
     private String username;
     
+    @Column(name = "email", unique = true)
+    private String email;
+    
     @Column(name = "password")
     private String password;
 
@@ -39,6 +42,9 @@ public class Account {
     
     @Column(name = "phone")
     private String phone;
+    
+    @Column(name = "locked")
+    private boolean locked = false;
 
     @ManyToOne
     @JoinColumn(name = "class_id")
@@ -85,4 +91,8 @@ public class Account {
     
     @OneToMany(mappedBy = "parent")
     private List<VaccinationConfirmation> parentVaccinationConfirmations;
+    
+    public boolean isLocked() {
+        return locked;
+    }
 } 
