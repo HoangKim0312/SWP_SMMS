@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -13,12 +14,15 @@ import java.util.List;
 @Table(name = "Account")
 public class Account {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "account_id")
-    private Long accountId;
+    private UUID accountId;
     
     @Column(name = "username", unique = true)
     private String username;
+    
+    @Column(name = "email", unique = true)
+    private String email;
     
     @Column(name = "password")
     private String password;
@@ -38,6 +42,9 @@ public class Account {
     
     @Column(name = "phone")
     private String phone;
+    
+    @Column(name = "locked")
+    private boolean locked = false;
 
     @ManyToOne
     @JoinColumn(name = "class_id")
@@ -84,4 +91,8 @@ public class Account {
     
     @OneToMany(mappedBy = "parent")
     private List<VaccinationConfirmation> parentVaccinationConfirmations;
+    
+    public boolean isLocked() {
+        return locked;
+    }
 } 
