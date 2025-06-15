@@ -28,13 +28,14 @@ public class MedicalProfileController {
     @Autowired
     private MedicalProfileService medicalProfileService;
 
-    @PostMapping("/create/{studentId}")
+    @PostMapping("/create/{studentId}/{recordId}")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createMedicalProfile(
             @PathVariable UUID studentId,
+            @PathVariable Long recordId,
             @RequestBody MedicalProfileRequest medicalProfileRequest) {
 
-        MedicalProfileResponse createdProfile = medicalProfileService.createMedicalProfile(studentId, medicalProfileRequest);
+        MedicalProfileResponse createdProfile = medicalProfileService.createMedicalProfile(studentId,recordId ,medicalProfileRequest);
 
         return ResponseBuilder.responseBuilderWithData(
                 HttpStatus.CREATED,

@@ -32,15 +32,15 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
     private ModelMapper modelMapper;
 
     @Override
-    public MedicalProfileResponse createMedicalProfile(UUID studentId, MedicalProfileRequest request) {
+    public MedicalProfileResponse createMedicalProfile(UUID studentId, Long recordID, MedicalProfileRequest request) {
 
-        if (!accountRepository.existsByAccountIdAndRole_RoleId(studentId, 3L)) {
+        if (!accountRepository.existsByAccountIdAndRole_RoleId(studentId, 1L)) {
             throw new RuntimeException("Student not exists or not a student");
         }
 
-        if (medicalProfileRepository.existsByStudent_AccountId(studentId)) {
-            throw new RuntimeException("Medical profile already exists for this student");
-        }
+        //NOT AVAILABLE, NEED FUTURE UPDATE:
+        //check if recordID is valid and studentID(record) = studentID(medicalProfile)
+
 
         // Map request to entity
         MedicalProfile profile = modelMapper.map(request, MedicalProfile.class);
@@ -49,6 +49,9 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         Account student = accountRepository.findAccountByAccountId(studentId);
         profile.setStudent(student);
 
+        // Set recordId
+        profile.setRecordId(recordID);
+
         // Save to DB
         medicalProfileRepository.save(profile);
 
@@ -56,6 +59,16 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         MedicalProfileResponse response = modelMapper.map(profile, MedicalProfileResponse.class);
         response.setStudentId(studentId);  // make sure MedicalProfileResponse has this field
         return response;
+    }
+
+    @Override
+    public MedicalProfileResponse showLastMedicalProfile(UUID studentId, MedicalProfileRequest request) {
+        return null;
+    }
+
+    @Override
+    public MedicalProfileResponse showAllMedicalProfiles(UUID studentId, MedicalProfileRequest request) {
+        return null;
     }
 
 

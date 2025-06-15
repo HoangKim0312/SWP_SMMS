@@ -13,6 +13,5 @@ public class MedicalProfileRequest {
     private String lastUpdated;
     private String pastTreatments;
     private String visionStatus;
-    private Long recordId;
 }
 
