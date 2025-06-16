@@ -50,8 +50,8 @@ public class Account {
     @JoinColumn(name = "class_id")
     private Class clazz;
 
-    @OneToOne(mappedBy = "student")
-    private MedicalProfile medicalProfiles;
+    @OneToMany(mappedBy = "student")
+    private List<MedicalProfile> medicalProfiles;
     
     @OneToMany(mappedBy = "student")
     private List<HealthEvent> healthEvents;
