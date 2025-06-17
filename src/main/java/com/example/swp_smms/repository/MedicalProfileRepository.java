@@ -22,5 +22,9 @@ public interface MedicalProfileRepository extends JpaRepository<MedicalProfile, 
     @Query("SELECT m FROM MedicalProfile m WHERE m.student.accountId = :studentId ORDER BY m.lastUpdated DESC")
     List<MedicalProfile> findMedicalProfilesByStudentId(@Param("studentId") UUID studentId);
 
+    @Modifying
+    @Query("DELETE FROM MedicalProfile m WHERE m.student.accountId = :studentId AND m.medicalProfileId = :medicalProfileId")
+    void deleteByStudentIdAndMedicalProfileId(@Param("studentId") UUID studentId,
+                                              @Param("medicalProfileId") Long medicalProfileId);
 
 }

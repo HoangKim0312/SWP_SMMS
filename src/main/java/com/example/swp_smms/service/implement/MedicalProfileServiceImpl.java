@@ -9,6 +9,7 @@ import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.MedicalProfileRepository;
 import com.example.swp_smms.repository.RoleRepository;
 import com.example.swp_smms.service.MedicalProfileService;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -92,6 +93,25 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         ListMedicalProfileResponse response = new ListMedicalProfileResponse();
         response.setMedicalProfiles(responseList);
         return response;
+    }
+
+    @Override
+    @Transactional
+    public void deleteMedicalProfile(UUID studentId, Long medicalProfileId) {
+        boolean exists = medicalProfileRepository.existsById(medicalProfileId);
+        if (!exists) {
+            throw new RuntimeException("Medical profile not found with ID: " + medicalProfileId);
+        }
+
+        // Optional: Check that the profile belongs to the student
+        MedicalProfile profile = medicalProfileRepository.findById(medicalProfileId)
+                .orElseThrow(() -> new RuntimeException("Medical profile not found"));
+
+        if (!profile.getStudent().getAccountId().equals(studentId)) {
+            throw new RuntimeException("This profile does not belong to the specified student.");
+        }
+
+        medicalProfileRepository.deleteByStudentIdAndMedicalProfileId(studentId, medicalProfileId);
     }
 
 

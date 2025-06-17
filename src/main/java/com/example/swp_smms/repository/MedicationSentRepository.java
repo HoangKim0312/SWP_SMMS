@@ -2,6 +2,7 @@ package com.example.swp_smms.repository;
 
 import com.example.swp_smms.model.entity.MedicationSent;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -18,5 +19,15 @@ public interface MedicationSentRepository extends JpaRepository<MedicationSent, 
     List<MedicationSent> findActiveMedicationsByStudentIdAndDate(
             @Param("studentId") UUID studentId,
             @Param("currentDate") String currentDate);
+
+    @Query("SELECT m FROM MedicationSent m " +
+            "WHERE m.student.accountId = :studentId ")
+    List<MedicationSent> findAllByStudentId(
+            @Param("studentId") UUID studentId);
+
+    @Modifying
+    @Query("DELETE FROM MedicationSent m WHERE m.student.accountId = :studentId AND m.medSentId = :medicationSentId")
+    void deleteByStudentIdAndMedicationSentId(@Param("studentId") UUID studentId,
+                                              @Param("medicationSentId") Long medicationSentId);
 
 }

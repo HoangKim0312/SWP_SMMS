@@ -14,4 +14,6 @@ public interface MedicalProfileService {
 
     ListMedicalProfileResponse getAllMedicalProfiles(UUID studentId);
 
+    void deleteMedicalProfile(UUID studentId, Long medicalProfileId);
+
 }

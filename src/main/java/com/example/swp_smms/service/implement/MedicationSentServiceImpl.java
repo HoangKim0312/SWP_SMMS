@@ -1,6 +1,7 @@
 package com.example.swp_smms.service.implement;
 
 import com.example.swp_smms.model.entity.Account;
+import com.example.swp_smms.model.entity.MedicalProfile;
 import com.example.swp_smms.model.entity.MedicationSent;
 import com.example.swp_smms.model.entity.StudentParent;
 import com.example.swp_smms.model.payload.request.MedicationSentRequest;
@@ -66,7 +67,7 @@ public class MedicationSentServiceImpl implements MedicationSentService {
     }
 
     @Override
-    public ListMedicationSentResponse getAllMedicationSentsForStudent(UUID studentId) {
+    public ListMedicationSentResponse getAllActiveMedicationSentsForStudent(UUID studentId) {
         String today = LocalDate.now().toString();
         // Fetch all medication sent records for the student
         List<MedicationSent> sentList = medicationSentRepository.findActiveMedicationsByStudentIdAndDate(studentId,today);
@@ -85,6 +86,46 @@ public class MedicationSentServiceImpl implements MedicationSentService {
         ListMedicationSentResponse result = new ListMedicationSentResponse();
         result.setMedicationSentList(responseList);
         return result;
+    }
+
+    @Override
+    public ListMedicationSentResponse getAllMedicationSentsForStudent(UUID studentId) {
+        String today = LocalDate.now().toString();
+        // Fetch all medication sent records for the student
+        List<MedicationSent> sentList = medicationSentRepository.findAllByStudentId(studentId);
+
+        // Map each MedicationSent entity to MedicationSentResponse
+        List<MedicationSentResponse> responseList = sentList.stream()
+                .map(entity -> {
+                    MedicationSentResponse response = modelMapper.map(entity, MedicationSentResponse.class);
+                    response.setStudentId(entity.getStudent().getAccountId());
+                    response.setParentId(entity.getParent().getAccountId());
+                    return response;
+                })
+                .toList();
+
+        // Wrap in response object
+        ListMedicationSentResponse result = new ListMedicationSentResponse();
+        result.setMedicationSentList(responseList);
+        return result;
+    }
+
+    @Override
+    public void deleteMedicationSent(UUID studentId, Long medicationSentId) {
+        boolean exists = medicationSentRepository.existsById(medicationSentId);
+        if (!exists) {
+            throw new RuntimeException("MedicalSent not found with ID: " + medicationSentId);
+        }
+
+        // Optional: Check that the profile belongs to the student
+        MedicationSent medicationSent = medicationSentRepository.findById(medicationSentId)
+                .orElseThrow(() -> new RuntimeException("MedicalSent not found"));
+
+        if (!medicationSent.getStudent().getAccountId().equals(studentId)) {
+            throw new RuntimeException("This medSent does not belong to the specified student.");
+        }
+
+        medicationSentRepository.deleteByStudentIdAndMedicationSentId(studentId, medicationSentId);
     }
 
 

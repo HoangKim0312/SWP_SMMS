@@ -38,6 +38,19 @@ public class MedicationSentController {
     public ResponseEntity<ListMedicationSentResponse> getActiveMedicationSentsForStudent(
             @PathVariable UUID studentId) {
 
+        ListMedicationSentResponse response = medicationSentService.getAllActiveMedicationSentsForStudent(studentId);
+
+        if (response.getMedicationSentList().isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204 No Content if nothing found
+        }
+
+        return ResponseEntity.ok(response); // 200 OK with data
+    }
+
+    @GetMapping("/student/{studentId}/all-med-sents")
+    public ResponseEntity<ListMedicationSentResponse> getAllMedicationSentsForStudent(
+            @PathVariable UUID studentId) {
+
         ListMedicationSentResponse response = medicationSentService.getAllMedicationSentsForStudent(studentId);
 
         if (response.getMedicationSentList().isEmpty()) {
@@ -46,4 +59,16 @@ public class MedicationSentController {
 
         return ResponseEntity.ok(response); // 200 OK with data
     }
+
+    @DeleteMapping("/delete/{studentId}/{medicationSentId}")
+    public ResponseEntity<Object> deleteMedicationSent(
+            @PathVariable UUID studentId,
+            @PathVariable Long medicationSentId) {
+
+        medicationSentService.deleteMedicationSent(studentId, medicationSentId);
+
+        return ResponseEntity.ok("MedicationSent deleted successfully");
+    }
+
+
 }
