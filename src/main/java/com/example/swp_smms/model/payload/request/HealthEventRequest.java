@@ -6,7 +6,7 @@ import java.time.LocalDate;
 @Data
 public class HealthEventRequest
 {
-    private LocalDate eventDate;
+    private String eventDate;
     private String eventType;
     private String description;
     private String solution;

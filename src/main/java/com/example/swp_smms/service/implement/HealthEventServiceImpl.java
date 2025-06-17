@@ -32,7 +32,7 @@ public class HealthEventServiceImpl implements HealthEventService {
         }
         
         // Validate nurse exists
-        if (!accountRepository.existsByAccountIdAndRole_RoleId(nurseId, 2L)) {
+        if (!accountRepository.existsByAccountIdAndRole_RoleId(nurseId, 3L)) {
             throw new RuntimeException("Nurse not exists or not a nurse");
         }
         

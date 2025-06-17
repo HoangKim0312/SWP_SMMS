@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Data
 public class HealthEventResponse {
-    private LocalDate eventDate;
+    private String eventDate;
     private String eventType;
     private String description;
     private String solution;
