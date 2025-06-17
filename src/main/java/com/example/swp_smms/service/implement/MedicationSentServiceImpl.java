@@ -128,5 +128,30 @@ public class MedicationSentServiceImpl implements MedicationSentService {
         medicationSentRepository.deleteByStudentIdAndMedicationSentId(studentId, medicationSentId);
     }
 
+    @Override
+    public MedicationSentResponse updateMedicationSent(UUID studentId, Long medicationSentId, MedicationSentRequest request) {
+        // Retrieve the existing record
+        MedicationSent existing = medicationSentRepository.findById(medicationSentId)
+                .orElseThrow(() -> new RuntimeException("MedicationSent not found with ID: " + medicationSentId));
+
+        // Check ownership
+        if (!existing.getStudent().getAccountId().equals(studentId)) {
+            throw new RuntimeException("This MedicationSent does not belong to the specified student.");
+        }
+
+        // Map updated fields from request to the existing entity
+        modelMapper.map(request, existing);
+
+        // Save changes
+        MedicationSent updated = medicationSentRepository.save(existing);
+
+        // Map to response
+        MedicationSentResponse response = modelMapper.map(updated, MedicationSentResponse.class);
+        response.setStudentId(updated.getStudent().getAccountId());
+        response.setParentId(updated.getParent().getAccountId());
+
+        return response;
+    }
+
 
 }

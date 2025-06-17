@@ -16,4 +16,6 @@ public interface MedicationSentService {
 
     void deleteMedicationSent(UUID studentId, Long medicationSentId);
 
+    MedicationSentResponse updateMedicationSent(UUID studentId, Long medicationSentId, MedicationSentRequest request);
+
 }
