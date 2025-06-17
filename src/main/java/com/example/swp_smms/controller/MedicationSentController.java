@@ -1,5 +1,6 @@
 package com.example.swp_smms.controller;
 
+import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.MedicationSentRequest;
 import com.example.swp_smms.model.payload.response.ListMedicationSentResponse;
 import com.example.swp_smms.model.payload.response.MedicationSentResponse;
@@ -68,6 +69,22 @@ public class MedicationSentController {
         medicationSentService.deleteMedicationSent(studentId, medicationSentId);
 
         return ResponseEntity.ok("MedicationSent deleted successfully");
+    }
+
+    // Update MedicationSent
+    @PutMapping("/update/{studentId}/{medicationSentId}")
+    public ResponseEntity<Object> updateMedicationSent(
+            @PathVariable UUID studentId,
+            @PathVariable Long medicationSentId,
+            @RequestBody MedicationSentRequest request) {
+
+        MedicationSentResponse updated = medicationSentService.updateMedicationSent(studentId, medicationSentId, request);
+
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "MedicationSent updated successfully",
+                updated
+        );
     }
 
 
