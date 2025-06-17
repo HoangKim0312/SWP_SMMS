@@ -33,8 +33,11 @@ public class MedicalProfile {
     @Column(name = "past_treatments")
     private String pastTreatments;
 
-    @Column(name = "vision_status")
-    private String visionStatus;
+    @Column(name = "vision_status_left")
+    private String visionStatusLeft;
+
+    @Column(name = "vision_status_right")
+    private String visionStatusRight;
 
     @Column(name = "hearing_status")
     private String hearingStatus;
@@ -42,6 +45,8 @@ public class MedicalProfile {
     @Column(name = "immunization_status")
     private String immunizationStatus;
 
+
+    //yyyy-MM-dd
     @Column(name = "last_updated")
     private String lastUpdated;
 }

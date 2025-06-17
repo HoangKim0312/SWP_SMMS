@@ -14,6 +14,7 @@ public class MedicalProfileResponse {
     private String lastUpdated;
     private String pastTreatments;
     private Long recordId;
-    private String visionStatus;
+    private String visionStatusLeft;
+    private String visionStatusRight;
     private UUID studentId;
 }

@@ -2,7 +2,7 @@ package com.example.swp_smms.controller;
 
 import com.example.swp_smms.model.payload.request.LoginRequest;
 import com.example.swp_smms.model.payload.request.ChangePasswordRequest;
-import com.example.swp_smms.model.payload.response.ResponseBuilder;
+import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.service.AuthenticationService;
 import com.example.swp_smms.service.AccountService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -98,15 +98,14 @@ public class AuthController {
     }
 
     @PutMapping("/change-password/{accountId}")
-    public ResponseEntity<ResponseBuilder<Void>> changePassword(
+    public ResponseEntity<Object> changePassword(
             @PathVariable UUID accountId,
             @Valid @RequestBody ChangePasswordRequest request) {
         try {
             accountService.changePassword(accountId, request);
-            return ResponseEntity.ok(ResponseBuilder.success("Password changed successfully"));
+            return ResponseBuilder.responseBuilder(HttpStatus.OK, "Password changed successfully");
         } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(ResponseBuilder.error(e.getMessage()));
+            return ResponseBuilder.responseBuilder(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 } 

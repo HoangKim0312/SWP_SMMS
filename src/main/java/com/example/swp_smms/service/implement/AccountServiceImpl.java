@@ -4,6 +4,8 @@ import com.example.swp_smms.model.entity.Account;
 import com.example.swp_smms.model.entity.Role;
 import com.example.swp_smms.model.payload.request.AccountRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
+import com.example.swp_smms.model.payload.response.ChildData;
+import com.example.swp_smms.model.payload.response.GetChildResponse;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.RoleRepository;
 import com.example.swp_smms.service.AccountService;
@@ -14,6 +16,8 @@ import org.springframework.stereotype.Service;
 import com.example.swp_smms.model.payload.request.ChangePasswordRequest;
 import com.example.swp_smms.exception.SmmsException;
 import org.springframework.http.HttpStatus;
+
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -74,4 +78,10 @@ public class AccountServiceImpl implements AccountService {
         account.setPassword(passwordEncoder.encode(request.getNewPassword()));
         accountRepository.save(account);
     }
+
+    @Override
+    public List<ChildData> getAllChildrenByParentID(UUID parentAccountId) {
+        return accountRepository.findChildrenAccounts(parentAccountId);
+    }
+
 }

@@ -3,8 +3,7 @@ package com.example.swp_smms.controller;
 import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.AccountRequest;
 import com.example.swp_smms.model.payload.request.MedicalProfileRequest;
-import com.example.swp_smms.model.payload.response.AccountResponse;
-import com.example.swp_smms.model.payload.response.MedicalProfileResponse;
+import com.example.swp_smms.model.payload.response.*;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.service.MedicalProfileService;
 import org.modelmapper.ModelMapper;
@@ -13,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,7 +32,7 @@ public class MedicalProfileController {
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> createMedicalProfile(
             @PathVariable UUID studentId,
-            @PathVariable Long recordId,
+            @RequestParam(required = false) Long recordId,
             @RequestBody MedicalProfileRequest medicalProfileRequest) {
 
         MedicalProfileResponse createdProfile = medicalProfileService.createMedicalProfile(studentId,recordId ,medicalProfileRequest);
@@ -43,6 +43,28 @@ public class MedicalProfileController {
                 createdProfile
         );
     }
+
+    @GetMapping("/latest/{studentId}")
+    public ResponseEntity<MedicalProfileResponse> getLatestMedicalProfile(@PathVariable UUID studentId) {
+        MedicalProfileResponse response = medicalProfileService.getLastMedicalProfile(studentId);
+
+        if (response == null) {
+            return ResponseEntity.notFound().build(); // 404 if no profile found
+        }
+
+        return ResponseEntity.ok(response); // 200 OK with the latest profile
+    }
+    @GetMapping("/all/{studentId}")
+    public ResponseEntity<ListMedicalProfileResponse> getAllMedicalProfiles(@PathVariable UUID studentId) {
+        ListMedicalProfileResponse response = medicalProfileService.getAllMedicalProfiles(studentId);
+
+        if (response == null || response.getMedicalProfiles() == null || response.getMedicalProfiles().isEmpty()) {
+            return ResponseEntity.notFound().build(); // 404 if no profiles found
+        }
+
+        return ResponseEntity.ok(response); // 200 OK with the list of profiles
+    }
+
 
 
 }
