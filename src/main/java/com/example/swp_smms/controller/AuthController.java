@@ -1,8 +1,10 @@
 package com.example.swp_smms.controller;
 
-import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.LoginRequest;
+import com.example.swp_smms.model.payload.request.ChangePasswordRequest;
+import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.service.AuthenticationService;
+import com.example.swp_smms.service.AccountService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -27,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
 
 @RestController
 @OpenAPIDefinition(info = @Info(
@@ -43,6 +46,7 @@ import java.security.NoSuchAlgorithmException;
 public class AuthController {
 
     private final AuthenticationService authService;
+    private final AccountService accountService;
 
     @Operation(summary = "Login in to the system", description = "Login into the system requires all information to be provided, " + "and validations will be performed. The response will include an access token and a refresh token")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Successfully Login", content = @Content(examples = @ExampleObject(value = """
@@ -91,5 +95,17 @@ public class AuthController {
     public ResponseEntity<Object> logout(HttpServletRequest request) {
         authService.logout(request);
         return ResponseBuilder.responseBuilder(HttpStatus.OK, "Logged out successfully");
+    }
+
+    @PutMapping("/change-password/{accountId}")
+    public ResponseEntity<Object> changePassword(
+            @PathVariable UUID accountId,
+            @Valid @RequestBody ChangePasswordRequest request) {
+        try {
+            accountService.changePassword(accountId, request);
+            return ResponseBuilder.responseBuilder(HttpStatus.OK, "Password changed successfully");
+        } catch (Exception e) {
+            return ResponseBuilder.responseBuilder(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
     }
 } 

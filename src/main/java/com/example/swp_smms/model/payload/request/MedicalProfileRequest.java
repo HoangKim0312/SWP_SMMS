@@ -12,6 +12,7 @@ public class MedicalProfileRequest {
     private String immunizationStatus;
     private String lastUpdated;
     private String pastTreatments;
-    private String visionStatus;
+    private String visionStatusLeft;
+    private String visionStatusRight;
 }
 
