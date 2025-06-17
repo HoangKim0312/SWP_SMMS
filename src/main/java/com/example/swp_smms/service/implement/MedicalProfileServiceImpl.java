@@ -2,9 +2,8 @@ package com.example.swp_smms.service.implement;
 
 import com.example.swp_smms.model.entity.Account;
 import com.example.swp_smms.model.entity.MedicalProfile;
-import com.example.swp_smms.model.entity.Role;
 import com.example.swp_smms.model.payload.request.MedicalProfileRequest;
-import com.example.swp_smms.model.payload.response.AccountResponse;
+import com.example.swp_smms.model.payload.response.ListMedicalProfileResponse;
 import com.example.swp_smms.model.payload.response.MedicalProfileResponse;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.MedicalProfileRepository;
@@ -12,8 +11,11 @@ import com.example.swp_smms.repository.RoleRepository;
 import com.example.swp_smms.service.MedicalProfileService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -62,13 +64,34 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
     }
 
     @Override
-    public MedicalProfileResponse showLastMedicalProfile(UUID studentId, MedicalProfileRequest request) {
-        return null;
+    public MedicalProfileResponse getLastMedicalProfile(UUID studentId) {
+        Pageable pageable = PageRequest.of(0, 1); // Only get the latest one
+        List<MedicalProfile> latestProfiles = medicalProfileRepository.findMedicalProfilesByStudentId(studentId, pageable);
+
+        if (latestProfiles.isEmpty()) {
+            return null; // or throw a custom NotFoundException
+        }
+
+        MedicalProfile profile = latestProfiles.get(0);
+
+        // Map entity to response
+        MedicalProfileResponse response = modelMapper.map(profile, MedicalProfileResponse.class);
+        return response;
     }
 
+
     @Override
-    public MedicalProfileResponse showAllMedicalProfiles(UUID studentId, MedicalProfileRequest request) {
-        return null;
+    public ListMedicalProfileResponse getAllMedicalProfiles(UUID studentId) {
+
+        List<MedicalProfile> profiles = medicalProfileRepository.findMedicalProfilesByStudentId(studentId);
+
+        List<MedicalProfileResponse> responseList = profiles.stream()
+                .map(profile -> modelMapper.map(profile, MedicalProfileResponse.class))
+                .toList();
+
+        ListMedicalProfileResponse response = new ListMedicalProfileResponse();
+        response.setMedicalProfiles(responseList);
+        return response;
     }
 
 
