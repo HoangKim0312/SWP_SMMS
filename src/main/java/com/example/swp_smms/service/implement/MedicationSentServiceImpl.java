@@ -5,6 +5,7 @@ import com.example.swp_smms.model.entity.MedicationSent;
 import com.example.swp_smms.model.entity.StudentParent;
 import com.example.swp_smms.model.payload.request.MedicationSentRequest;
 import com.example.swp_smms.model.payload.response.ChildData;
+import com.example.swp_smms.model.payload.response.ListMedicationSentResponse;
 import com.example.swp_smms.model.payload.response.MedicationSentResponse;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.MedicalProfileRepository;
@@ -16,6 +17,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +35,9 @@ public class MedicationSentServiceImpl implements MedicationSentService {
     private ModelMapper modelMapper;
 
     @Override
-    public MedicationSentResponse createMedicationSent(UUID studentId, UUID parentId,String sentAt, MedicationSentRequest request) {
+    public MedicationSentResponse createMedicationSent(UUID studentId, UUID parentId, MedicationSentRequest request) {
+
+        String sentAt = LocalDate.now().toString();
         List<ChildData> children = accountRepository.findChildrenAccounts(parentId);
         boolean isChild = children.stream()
                 .anyMatch(child -> child.getChildId().equals(studentId));
@@ -62,7 +66,26 @@ public class MedicationSentServiceImpl implements MedicationSentService {
     }
 
     @Override
-    public List<MedicationSentResponse> getAllMedicationSentsForStudent(UUID studentId) {
-        return List.of();
+    public ListMedicationSentResponse getAllMedicationSentsForStudent(UUID studentId) {
+        String today = LocalDate.now().toString();
+        // Fetch all medication sent records for the student
+        List<MedicationSent> sentList = medicationSentRepository.findActiveMedicationsByStudentIdAndDate(studentId,today);
+
+        // Map each MedicationSent entity to MedicationSentResponse
+        List<MedicationSentResponse> responseList = sentList.stream()
+                .map(entity -> {
+                    MedicationSentResponse response = modelMapper.map(entity, MedicationSentResponse.class);
+                    response.setStudentId(entity.getStudent().getAccountId());
+                    response.setParentId(entity.getParent().getAccountId());
+                    return response;
+                })
+                .toList();
+
+        // Wrap in response object
+        ListMedicationSentResponse result = new ListMedicationSentResponse();
+        result.setMedicationSentList(responseList);
+        return result;
     }
+
+
 }

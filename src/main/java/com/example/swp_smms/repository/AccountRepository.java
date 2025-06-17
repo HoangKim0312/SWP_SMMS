@@ -19,9 +19,13 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     Account findAccountByAccountId(UUID accountId);
 
-    @Query("SELECT new com.example.swp_smms.model.payload.response.ChildData(sp.student.accountId, sp.student.fullName) " +
+    @Query("SELECT new com.example.swp_smms.model.payload.response.ChildData(sp.student.accountId, sp.student.fullName, sp.student.clazz.classId) " +
             "FROM StudentParent sp WHERE sp.parent.accountId = :parentAccountId")
     List<ChildData> findChildrenAccounts(@Param("parentAccountId") UUID parentAccountId);
 
+    @Query("SELECT DISTINCT new com.example.swp_smms.model.payload.response.ChildData(a.accountId, a.fullName, a.clazz.classId) " +
+            "FROM Account a JOIN a.medicationSents ms " +
+            "WHERE :today >= ms.startDate AND :today <= ms.endDate")
+    List<ChildData> findStudentsWithOngoingMedication(@Param("today") String today);
 
 }

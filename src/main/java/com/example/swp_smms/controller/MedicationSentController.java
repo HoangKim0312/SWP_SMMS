@@ -1,6 +1,7 @@
 package com.example.swp_smms.controller;
 
 import com.example.swp_smms.model.payload.request.MedicationSentRequest;
+import com.example.swp_smms.model.payload.response.ListMedicationSentResponse;
 import com.example.swp_smms.model.payload.response.MedicationSentResponse;
 import com.example.swp_smms.service.MedicationSentService;
 
@@ -18,18 +19,31 @@ public class MedicationSentController {
 
     private final MedicationSentService medicationSentService;
 
-    @PostMapping("/create/{studentId}/{parentId}/{sentAt}")
+    @PostMapping("/create/{studentId}/{parentId}")
     public ResponseEntity<MedicationSentResponse> createMedicationSent(
             @PathVariable UUID studentId,
             @PathVariable UUID parentId,
-            @PathVariable String sentAt,
             @RequestBody MedicationSentRequest request) {
 
         try {
-            MedicationSentResponse response = medicationSentService.createMedicationSent(studentId, parentId, sentAt , request);
+            MedicationSentResponse response = medicationSentService.createMedicationSent(studentId, parentId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // or custom error response
         }
+    }
+
+
+    @GetMapping("/student/{studentId}/active-med-sents")
+    public ResponseEntity<ListMedicationSentResponse> getActiveMedicationSentsForStudent(
+            @PathVariable UUID studentId) {
+
+        ListMedicationSentResponse response = medicationSentService.getAllMedicationSentsForStudent(studentId);
+
+        if (response.getMedicationSentList().isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204 No Content if nothing found
+        }
+
+        return ResponseEntity.ok(response); // 200 OK with data
     }
 }
