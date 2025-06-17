@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
-public class HealthEventImpl implements HealthEventService {
+public class HealthEventServiceImpl implements HealthEventService {
     
     @Autowired
     private AccountRepository accountRepository;
