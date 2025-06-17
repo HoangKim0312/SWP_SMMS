@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.swp_smms.model.payload.request.ChangePasswordRequest;
-import com.example.swp_smms.exception.SmmsException;
+import com.example.swp_smms.model.exception.SmmsException;
 import org.springframework.http.HttpStatus;
 
 import java.util.List;
