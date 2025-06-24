@@ -13,4 +13,5 @@ public class AccountResponse {
     private String gender;
     private String phone;
     private Long roleId;
+    private String email;
 }
