@@ -7,4 +7,6 @@ import java.util.UUID;
 
 public interface HealthEventService {
     HealthEventResponse createHealthEvent(UUID studentID, UUID nurseID, HealthEventRequest healthEventRequest);
+   HealthEventResponse viewHealthEvent();
+
 }
