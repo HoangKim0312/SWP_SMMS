@@ -32,6 +32,7 @@ import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.security.JwtTokenProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -117,9 +118,12 @@ public class AuthController {
         }
     }
 
-    @GetMapping("/me")
-    public Object getCurrentUser(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+    @PostMapping("/me")
+    public Object getCurrentUser(@RequestBody TokenRequest tokenRequest) {
+        if (tokenRequest == null || !StringUtils.hasText(tokenRequest.getToken())) {
+            return ResponseBuilder.responseBuilder(HttpStatus.BAD_REQUEST, "No token provided");
+        }
+        String token = tokenRequest.getToken();
         String email = jwtTokenProvider.getUsernameFromJwt(token);
         Account account = accountRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Account not found for token"));
@@ -133,5 +137,11 @@ public class AuthController {
         response.setRoleId(account.getRole() != null ? account.getRole().getRoleId() : null);
         response.setEmail(account.getEmail());
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Current user fetched successfully", response);
+    }
+
+    static class TokenRequest {
+        private String token;
+        public String getToken() { return token; }
+        public void setToken(String token) { this.token = token; }
     }
 } 
