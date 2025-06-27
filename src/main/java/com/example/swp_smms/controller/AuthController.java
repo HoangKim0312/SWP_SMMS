@@ -26,6 +26,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.swp_smms.model.entity.Account;
+import com.example.swp_smms.model.payload.response.AccountResponse;
+import com.example.swp_smms.repository.AccountRepository;
+import com.example.swp_smms.security.JwtTokenProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -47,6 +53,8 @@ public class AuthController {
 
     private final AuthenticationService authService;
     private final AccountService accountService;
+    private final AccountRepository accountRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Operation(summary = "Login in to the system", description = "Login into the system requires all information to be provided, " + "and validations will be performed. The response will include an access token and a refresh token")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Successfully Login", content = @Content(examples = @ExampleObject(value = """
@@ -107,5 +115,23 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseBuilder.responseBuilder(HttpStatus.BAD_REQUEST, e.getMessage());
         }
+    }
+
+    @GetMapping("/me")
+    public Object getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String email = jwtTokenProvider.getUsernameFromJwt(token);
+        Account account = accountRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Account not found for token"));
+        AccountResponse response = new AccountResponse();
+        response.setAccountId(account.getAccountId());
+        response.setUsername(account.getUsername());
+        response.setFullName(account.getFullName());
+        response.setDob(account.getDob());
+        response.setGender(account.getGender());
+        response.setPhone(account.getPhone());
+        response.setRoleId(account.getRole() != null ? account.getRole().getRoleId() : null);
+        response.setEmail(account.getEmail());
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Current user fetched successfully", response);
     }
 } 
