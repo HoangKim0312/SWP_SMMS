@@ -2,6 +2,8 @@ package com.example.swp_smms.repository;
 
 import com.example.swp_smms.model.entity.Account;
 import com.example.swp_smms.model.payload.response.ChildData;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,6 +18,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findByEmail(String email);
     boolean existsByAccountIdAndRole_RoleId(UUID accountId, Long roleId);
     boolean existsByEmail(String email);
+    Page<Account> findByRole_RoleId(Long roleId, Pageable pageable);
 
     Account findAccountByAccountId(UUID accountId);
 

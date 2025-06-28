@@ -3,14 +3,19 @@ package com.example.swp_smms.service.implement;
 import com.example.swp_smms.model.entity.Account;
 import com.example.swp_smms.model.entity.Role;
 import com.example.swp_smms.model.payload.request.AccountRequest;
+import com.example.swp_smms.model.payload.request.AccountUpdateRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
 import com.example.swp_smms.model.payload.response.ChildData;
 import com.example.swp_smms.model.payload.response.GetChildResponse;
+import com.example.swp_smms.model.payload.response.PagedAccountResponse;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.RoleRepository;
 import com.example.swp_smms.service.AccountService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.example.swp_smms.model.payload.request.ChangePasswordRequest;
@@ -83,5 +88,67 @@ public class AccountServiceImpl implements AccountService {
     public List<ChildData> getAllChildrenByParentID(UUID parentAccountId) {
         return accountRepository.findChildrenAccounts(parentAccountId);
     }
+    @Override
+    public AccountResponse updateAccount(UUID accountId, AccountUpdateRequest request) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        if (isNotBlank(request.getFullName())) {
+            account.setFullName(request.getFullName());
+        }
+        if (isNotBlank(request.getDob())) {
+            account.setDob(request.getDob());
+        }
+        if (isNotBlank(request.getGender())) {
+            account.setGender(request.getGender());
+        }
+        if (isNotBlank(request.getPhone())) {
+            account.setPhone(request.getPhone());
+        }
+
+        Account updated = accountRepository.save(account);
+        return modelMapper.map(updated, AccountResponse.class);
+    }
+
+    private boolean isNotBlank(String value) {
+        return value != null && !value.trim().isEmpty();
+    }
+
+
+    @Override
+    public PagedAccountResponse getAllAccounts(int page, int size) {
+        Page<Account> accountPage = accountRepository.findAll(PageRequest.of(page, size));
+        List<AccountResponse> responses = accountPage.getContent().stream()
+                .map(account -> modelMapper.map(account, AccountResponse.class))
+                .toList();
+
+        PagedAccountResponse pagedResponse = new PagedAccountResponse();
+        pagedResponse.setAccounts(responses);
+        pagedResponse.setCurrentPage(accountPage.getNumber());
+        pagedResponse.setTotalPages(accountPage.getTotalPages());
+        pagedResponse.setTotalItems(accountPage.getTotalElements());
+
+        return pagedResponse;
+    }
+
+    @Override
+    public PagedAccountResponse getAccountsByRole(Long roleId, Pageable pageable) {
+
+        Page<Account> page = accountRepository.findByRole_RoleId(roleId, pageable);
+
+        List<AccountResponse> accountResponses = page.getContent().stream()
+                .map(account -> modelMapper.map(account, AccountResponse.class))
+                .toList();
+
+        PagedAccountResponse response = new PagedAccountResponse();
+        response.setAccounts(accountResponses);
+        response.setCurrentPage(page.getNumber());
+        response.setTotalPages(page.getTotalPages());
+        response.setTotalItems(page.getTotalElements());
+
+        return response;
+    }
+
+
 
 }
