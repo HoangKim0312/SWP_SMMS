@@ -22,6 +22,9 @@ public class Class {
     
     @Column(name = "description")
     private String description;
+
+    @Column(name = "school-year")
+    private int schoolYear;
     
     @OneToMany(mappedBy = "clazz")
     private List<Account> accounts;

@@ -130,11 +130,15 @@ public class AccountServiceImpl implements AccountService {
 
         return pagedResponse;
     }
-
     @Override
-    public PagedAccountResponse getAccountsByRole(Long roleId, Pageable pageable) {
+    public PagedAccountResponse getAccountsByRole(Long roleId, Pageable pageable, String name) {
+        Page<Account> page;
 
-        Page<Account> page = accountRepository.findByRole_RoleId(roleId, pageable);
+        if (name == null || name.trim().isEmpty()) {
+            page = accountRepository.findByRole_RoleId(roleId, pageable);
+        } else {
+            page = accountRepository.findByRole_RoleIdAndFullNameContainingIgnoreCase(roleId, name, pageable);
+        }
 
         List<AccountResponse> accountResponses = page.getContent().stream()
                 .map(account -> modelMapper.map(account, AccountResponse.class))
@@ -148,6 +152,7 @@ public class AccountServiceImpl implements AccountService {
 
         return response;
     }
+
 
 
 

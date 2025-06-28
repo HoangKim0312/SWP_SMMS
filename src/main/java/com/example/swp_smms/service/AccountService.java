@@ -17,6 +17,6 @@ public interface AccountService {
     List<ChildData> getAllChildrenByParentID(UUID parentAccountId);
     AccountResponse updateAccount(UUID accountId, AccountUpdateRequest request);
     PagedAccountResponse getAllAccounts(int page, int size);
-    PagedAccountResponse getAccountsByRole(Long roleId, Pageable pageable);
+    PagedAccountResponse getAccountsByRole(Long roleId, Pageable pageable, String name);
 
 }

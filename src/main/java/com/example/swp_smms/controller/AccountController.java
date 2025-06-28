@@ -51,13 +51,14 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getAllAccounts(page, size));
     }
 
-    @GetMapping("/sort-by-role")
+    @GetMapping("/search-sort-by-role")
     public ResponseEntity<PagedAccountResponse> getAccountsByRole(
             @RequestParam Long roleId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(defaultValue = "asc") String sortDir
+            @RequestParam(defaultValue = "asc") String sortDir,
+            @RequestParam(required = false) String name
     ) {
         Pageable pageable;
 
@@ -70,13 +71,8 @@ public class AccountController {
             pageable = PageRequest.of(page, size, sort);
         }
 
-        PagedAccountResponse response = accountService.getAccountsByRole(roleId, pageable);
+        PagedAccountResponse response = accountService.getAccountsByRole(roleId, pageable, name);
         return ResponseEntity.ok(response);
     }
-
-
-
-
-
 
 }

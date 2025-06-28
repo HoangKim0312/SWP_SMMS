@@ -19,6 +19,8 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     boolean existsByAccountIdAndRole_RoleId(UUID accountId, Long roleId);
     boolean existsByEmail(String email);
     Page<Account> findByRole_RoleId(Long roleId, Pageable pageable);
+    Page<Account> findByRole_RoleIdAndFullNameContainingIgnoreCase(Long roleId, String name, Pageable pageable);
+
 
     Account findAccountByAccountId(UUID accountId);
 
