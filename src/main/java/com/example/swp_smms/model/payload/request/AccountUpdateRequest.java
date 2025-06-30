@@ -1,19 +1,14 @@
-package com.example.swp_smms.model.payload.response;
+// AccountUpdateRequest.java
+package com.example.swp_smms.model.payload.request;
 
 import lombok.Data;
 
-import java.util.UUID;
-
 @Data
-public class AccountResponse {
-    private UUID accountId;
-    private String username;
+public class AccountUpdateRequest {
     private String fullName;
     private String dob;
     private String gender;
     private String phone;
-    private Long roleId;
-    private String email;
     private Boolean emailNotificationsEnabled;
     private String notificationTypes;
 }
