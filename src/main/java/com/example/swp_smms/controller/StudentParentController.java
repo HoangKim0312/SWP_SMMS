@@ -25,4 +25,10 @@ public class StudentParentController {
         studentParentService.unlinkStudentParent(request.getStudentId(), request.getParentId());
         return ResponseEntity.ok(ResponseBuilder.success("Unlinked student and parent successfully"));
     }
+
+    @GetMapping("/children/{parentId}")
+    public ResponseEntity<?> getChildrenForParent(@PathVariable("parentId") java.util.UUID parentId) {
+        var children = studentParentService.getChildrenForParent(parentId);
+        return ResponseEntity.ok(children);
+    }
 } 

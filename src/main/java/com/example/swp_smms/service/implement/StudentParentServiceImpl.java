@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.ArrayList;
+import com.example.swp_smms.model.payload.response.StudentSummaryResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -37,5 +40,19 @@ public class StudentParentServiceImpl implements StudentParentService {
     @Transactional
     public void unlinkStudentParent(UUID studentId, UUID parentId) {
         studentParentRepository.deleteByStudent_AccountIdAndParent_AccountId(studentId, parentId);
+    }
+
+    @Override
+    public List<StudentSummaryResponse> getChildrenForParent(UUID parentId) {
+        List<StudentParent> links = studentParentRepository.findByParent_AccountId(parentId);
+        List<StudentSummaryResponse> children = new ArrayList<>();
+        for (StudentParent link : links) {
+            Account student = link.getStudent();
+            StudentSummaryResponse summary = new StudentSummaryResponse();
+            summary.setFullName(student.getFullName());
+            summary.setClassName(student.getClazz() != null ? student.getClazz().getClassName() : null);
+            children.add(summary);
+        }
+        return children;
     }
 } 
