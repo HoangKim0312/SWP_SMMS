@@ -9,4 +9,6 @@ public class AccountUpdateRequest {
     private String dob;
     private String gender;
     private String phone;
+    private Boolean emailNotificationsEnabled;
+    private String notificationTypes;
 }

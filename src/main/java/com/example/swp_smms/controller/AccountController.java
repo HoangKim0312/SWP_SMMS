@@ -48,8 +48,12 @@ public class AccountController {
     @GetMapping
     public ResponseEntity<PagedAccountResponse> getAllAccounts(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(accountService.getAllAccounts(page, size));
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long roleId,
+            @RequestParam(defaultValue = "fullName") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction) {
+        return ResponseEntity.ok(accountService.getAllAccounts(page, size, name, roleId, sortBy, direction));
     }
 
     @GetMapping("/search-sort-by-role")

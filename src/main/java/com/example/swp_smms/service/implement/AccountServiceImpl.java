@@ -105,6 +105,12 @@ public class AccountServiceImpl implements AccountService {
         if (isNotBlank(request.getPhone())) {
             account.setPhone(request.getPhone());
         }
+        if (request.getEmailNotificationsEnabled() != null) {
+            account.setEmailNotificationsEnabled(request.getEmailNotificationsEnabled());
+        }
+        if (request.getNotificationTypes() != null) {
+            account.setNotificationTypes(request.getNotificationTypes());
+        }
 
         Account updated = accountRepository.save(account);
         return modelMapper.map(updated, AccountResponse.class);
@@ -116,8 +122,26 @@ public class AccountServiceImpl implements AccountService {
 
 
     @Override
-    public PagedAccountResponse getAllAccounts(int page, int size) {
-        Page<Account> accountPage = accountRepository.findAll(PageRequest.of(page, size));
+    public PagedAccountResponse getAllAccounts(int page, int size, String name, Long roleId, String sortBy, String direction) {
+        Pageable pageable = org.springframework.data.domain.PageRequest.of(
+                page, size,
+                org.springframework.data.domain.Sort.by(
+                        "desc".equalsIgnoreCase(direction) ? org.springframework.data.domain.Sort.Direction.DESC : org.springframework.data.domain.Sort.Direction.ASC,
+                        sortBy
+                )
+        );
+
+        Page<Account> accountPage;
+        if (roleId != null && name != null && !name.trim().isEmpty()) {
+            accountPage = accountRepository.findByRole_RoleIdAndFullNameContainingIgnoreCase(roleId, name, pageable);
+        } else if (roleId != null) {
+            accountPage = accountRepository.findByRole_RoleId(roleId, pageable);
+        } else if (name != null && !name.trim().isEmpty()) {
+            accountPage = accountRepository.findByFullNameContainingIgnoreCase(name, pageable);
+        } else {
+            accountPage = accountRepository.findAll(pageable);
+        }
+
         List<AccountResponse> responses = accountPage.getContent().stream()
                 .map(account -> modelMapper.map(account, AccountResponse.class))
                 .toList();

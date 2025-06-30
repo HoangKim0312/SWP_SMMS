@@ -14,4 +14,6 @@ public class AccountResponse {
     private String phone;
     private Long roleId;
     private String email;
+    private Boolean emailNotificationsEnabled;
+    private String notificationTypes;
 }
