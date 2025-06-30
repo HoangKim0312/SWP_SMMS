@@ -73,4 +73,19 @@ public class HealthEventServiceImpl implements HealthEventService {
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public List<HealthEventResponse> viewHealthEventsByDate(String eventDate) {
+        List<HealthEvent> events = healthEventRepository.findByEventDate(eventDate);
+        return events.stream()
+                .map(event -> {
+                    HealthEventResponse response = modelMapper.map(event, HealthEventResponse.class);
+                    response.setStudentID(event.getStudent().getAccountId());
+                    if (event.getNurse() != null) {
+                        response.setNurseID(event.getNurse().getAccountId());
+                    }
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
 }

@@ -9,5 +9,5 @@ import java.util.UUID;
 public interface HealthEventService {
     HealthEventResponse createHealthEvent(UUID studentID, UUID nurseID, HealthEventRequest healthEventRequest);
     List<HealthEventResponse> viewAllHealthEvents();
-
+    List<HealthEventResponse> viewHealthEventsByDate(String eventDate);
 }

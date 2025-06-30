@@ -45,4 +45,14 @@ public class HealthEventController {
                 events
         );
     }
+
+    @GetMapping("/by-date/{eventDate}")
+    public ResponseEntity<Object> getHealthEventsByDate(@PathVariable String eventDate) {
+        List<HealthEventResponse> events = healthEventService.viewHealthEventsByDate(eventDate);
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "Health events for date retrieved successfully",
+                events
+        );
+    }
 }
