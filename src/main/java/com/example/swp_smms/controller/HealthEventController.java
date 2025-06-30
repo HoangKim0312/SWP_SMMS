@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,6 +33,16 @@ public class HealthEventController {
                 HttpStatus.CREATED,
                 "Health event created successfully",
                 createdEvent
+        );
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<Object> getAllHealthEvents() {
+        List<HealthEventResponse> events = healthEventService.viewAllHealthEvents();
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "All health events retrieved successfully",
+                events
         );
     }
 }

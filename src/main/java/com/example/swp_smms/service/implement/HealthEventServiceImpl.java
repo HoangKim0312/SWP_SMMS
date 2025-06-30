@@ -11,7 +11,9 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class HealthEventServiceImpl implements HealthEventService {
@@ -24,7 +26,8 @@ public class HealthEventServiceImpl implements HealthEventService {
     
     @Autowired
     private ModelMapper modelMapper;
-    
+
+    @Override
     public HealthEventResponse createHealthEvent(UUID studentId, UUID nurseId, HealthEventRequest request) {
         // Validate student exists
         if (!accountRepository.existsByAccountIdAndRole_RoleId(studentId, 1L)) {
@@ -54,5 +57,20 @@ public class HealthEventServiceImpl implements HealthEventService {
         response.setNurseID(nurseId);
         
         return response;
+    }
+
+    @Override
+    public List<HealthEventResponse> viewAllHealthEvents() {
+        List<HealthEvent> events = healthEventRepository.findAll();
+        return events.stream()
+                .map(event -> {
+                    HealthEventResponse response = modelMapper.map(event, HealthEventResponse.class);
+                    response.setStudentID(event.getStudent().getAccountId());
+                    if (event.getNurse() != null) {
+                        response.setNurseID(event.getNurse().getAccountId());
+                    }
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 }
