@@ -154,4 +154,23 @@ public class MedicationSentServiceImpl implements MedicationSentService {
     }
 
 
+    @Override
+    public ListMedicationSentResponse getAllActiveMedicationSentsForAllStudents() {
+        String today = LocalDate.now().toString();
+        List<MedicationSent> sentList = medicationSentRepository.findAllActiveMedications(today);
+
+        List<MedicationSentResponse> responseList = sentList.stream()
+                .map(entity -> {
+                    MedicationSentResponse response = modelMapper.map(entity, MedicationSentResponse.class);
+                    response.setStudentId(entity.getStudent().getAccountId());
+                    response.setParentId(entity.getParent().getAccountId());
+                    return response;
+                })
+                .toList();
+
+        ListMedicationSentResponse result = new ListMedicationSentResponse();
+        result.setMedicationSentList(responseList);
+        return result;
+    }
+
 }

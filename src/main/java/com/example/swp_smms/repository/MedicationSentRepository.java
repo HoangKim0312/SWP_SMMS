@@ -30,4 +30,8 @@ public interface MedicationSentRepository extends JpaRepository<MedicationSent, 
     void deleteByStudentIdAndMedicationSentId(@Param("studentId") UUID studentId,
                                               @Param("medicationSentId") Long medicationSentId);
 
+    @Query("SELECT m FROM MedicationSent m WHERE m.sentAt = :today")
+    List<MedicationSent> findAllActiveMedications(@Param("today") String today);
+
+
 }
