@@ -7,14 +7,15 @@ import com.example.swp_smms.model.payload.response.ChildData;
 import com.example.swp_smms.model.payload.response.GetChildResponse;
 import com.example.swp_smms.model.payload.response.PagedAccountResponse;
 import com.example.swp_smms.service.AccountService;
+import com.example.swp_smms.service.DataInitializationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class AccountController {
 
     private final AccountService accountService;
+    private final DataInitializationService dataInitializationService;
 
     @PostMapping
     public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody AccountRequest accountRequest) {
@@ -78,6 +80,28 @@ public class AccountController {
 
         PagedAccountResponse response = accountService.getAccountsByRole(roleId, pageable, name);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/initialize-roles")
+    public ResponseEntity<String> initializeRoles() {
+        try {
+            dataInitializationService.initializeRoles();
+            return ResponseEntity.ok("Roles initialized successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error initializing roles: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/roles")
+    public ResponseEntity<List<String>> getAvailableRoles() {
+        try {
+            List<String> roles = dataInitializationService.getAvailableRoles();
+            return ResponseEntity.ok(roles);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(List.of("Error getting roles: " + e.getMessage()));
+        }
     }
 
 }
