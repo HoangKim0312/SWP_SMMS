@@ -14,10 +14,11 @@ import java.util.UUID;
 public interface MedicationSentRepository extends JpaRepository<MedicationSent, Long> {
     @Query("SELECT m FROM MedicationSent m " +
             "WHERE m.student.accountId = :studentId " +
-            "AND :currentDate >= m.sentAt")
+            "AND :currentDate = m.sentAt")
     List<MedicationSent> findActiveMedicationsByStudentIdAndDate(
             @Param("studentId") UUID studentId,
             @Param("currentDate") String currentDate);
+
 
     @Query("SELECT m FROM MedicationSent m " +
             "WHERE m.student.accountId = :studentId ")
