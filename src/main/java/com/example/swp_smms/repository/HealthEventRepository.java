@@ -10,8 +10,9 @@ import java.util.UUID;
 
 @Repository
 public interface HealthEventRepository extends JpaRepository<HealthEvent, Long> {
+    boolean existsHealthEventByEventId(Long eventId);
 
-
+    ArrayList<HealthEvent> getHealthEventByEventId(Long eventId);
 
     List<HealthEvent> findByEventDate(String eventDate);
 }

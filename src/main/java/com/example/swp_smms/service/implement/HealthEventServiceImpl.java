@@ -114,7 +114,7 @@ public class HealthEventServiceImpl implements HealthEventService {
     @Override
     public void deleteHealthEvent(Long eventId) {
         if (!healthEventRepository.existsById(eventId)) {
-            throw new RuntimeException("Health Event not found with id: " + eventId);
+            throw new RuntimeException("HealthEvent not found with id: " + eventId);
         }
         healthEventRepository.deleteById(eventId);
     }
