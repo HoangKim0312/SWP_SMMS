@@ -9,7 +9,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
 import java.util.UUID;
 
@@ -53,6 +52,27 @@ public class HealthEventController {
                 HttpStatus.OK,
                 "Health events for date retrieved successfully",
                 events
+        );
+    }
+
+    @PutMapping("/update/{eventId}")
+    public ResponseEntity<Object> updateHealthEvent(
+            @PathVariable Long eventId,
+            @RequestBody HealthEventRequest healthEventRequest) {
+        HealthEventResponse updatedEvent = healthEventService.updateHealthEvent(eventId, healthEventRequest);
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "Health event updated successfully",
+                updatedEvent
+        );
+    }
+
+    @DeleteMapping("/delete/{eventId}")
+    public ResponseEntity<Object> deleteHealthEvent(@PathVariable Long eventId) {
+        healthEventService.deleteHealthEvent(eventId);
+        return ResponseBuilder.responseBuilder(
+                HttpStatus.OK,
+                "Health event deleted successfully"
         );
     }
 }

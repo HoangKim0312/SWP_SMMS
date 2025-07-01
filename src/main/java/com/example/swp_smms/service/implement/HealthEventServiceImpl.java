@@ -53,6 +53,7 @@ public class HealthEventServiceImpl implements HealthEventService {
         
         // Map to response
         HealthEventResponse response = modelMapper.map(event, HealthEventResponse.class);
+        response.setEventId(event.getEventId());
         response.setStudentID(studentId);
         response.setNurseID(nurseId);
         
@@ -65,6 +66,7 @@ public class HealthEventServiceImpl implements HealthEventService {
         return events.stream()
                 .map(event -> {
                     HealthEventResponse response = modelMapper.map(event, HealthEventResponse.class);
+                    response.setEventId(event.getEventId());
                     response.setStudentID(event.getStudent().getAccountId());
                     if (event.getNurse() != null) {
                         response.setNurseID(event.getNurse().getAccountId());
@@ -80,6 +82,7 @@ public class HealthEventServiceImpl implements HealthEventService {
         return events.stream()
                 .map(event -> {
                     HealthEventResponse response = modelMapper.map(event, HealthEventResponse.class);
+                    response.setEventId(event.getEventId());
                     response.setStudentID(event.getStudent().getAccountId());
                     if (event.getNurse() != null) {
                         response.setNurseID(event.getNurse().getAccountId());
@@ -87,5 +90,32 @@ public class HealthEventServiceImpl implements HealthEventService {
                     return response;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public HealthEventResponse updateHealthEvent(Long eventId, HealthEventRequest request) {
+        HealthEvent event = healthEventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("HealthEvent not found with id: " + eventId));
+
+        modelMapper.map(request, event);
+
+        HealthEvent updatedEvent = healthEventRepository.save(event);
+
+        HealthEventResponse response = modelMapper.map(updatedEvent, HealthEventResponse.class);
+        response.setEventId(updatedEvent.getEventId());
+        response.setStudentID(updatedEvent.getStudent().getAccountId());
+        if (updatedEvent.getNurse() != null) {
+            response.setNurseID(updatedEvent.getNurse().getAccountId());
+        }
+
+        return response;
+    }
+
+    @Override
+    public void deleteHealthEvent(Long eventId) {
+        if (!healthEventRepository.existsById(eventId)) {
+            throw new RuntimeException("HealthEvent not found with id: " + eventId);
+        }
+        healthEventRepository.deleteById(eventId);
     }
 }
