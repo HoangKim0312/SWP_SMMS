@@ -87,5 +87,17 @@ public class MedicationSentController {
         );
     }
 
+    @GetMapping("/all-students/active-med-sents")
+    public ResponseEntity<ListMedicationSentResponse> getAllActiveMedicationSentsForAllStudents() {
+        ListMedicationSentResponse response = medicationSentService.getAllActiveMedicationSentsForAllStudents();
+
+        if (response.getMedicationSentList().isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        }
+
+        return ResponseEntity.ok(response); // 200 OK
+    }
+
+
 
 }
