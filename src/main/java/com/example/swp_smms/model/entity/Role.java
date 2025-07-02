@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.util.List;
+// import com.example.swp_smms.model.enums.RoleEnum; // Uncomment if using @Enumerated
 
 @Data
 @NoArgsConstructor

@@ -2,6 +2,8 @@ package com.example.swp_smms.repository;
 
 import com.example.swp_smms.model.entity.Account;
 import com.example.swp_smms.model.payload.response.ChildData;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,12 +18,19 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
     Optional<Account> findByEmail(String email);
     boolean existsByAccountIdAndRole_RoleId(UUID accountId, Long roleId);
     boolean existsByEmail(String email);
+    Page<Account> findByRole_RoleId(Long roleId, Pageable pageable);
+    Page<Account> findByRole_RoleIdAndFullNameContainingIgnoreCase(Long roleId, String name, Pageable pageable);
+    Page<Account> findByFullNameContainingIgnoreCase(String name, Pageable pageable);
 
     Account findAccountByAccountId(UUID accountId);
 
-    @Query("SELECT new com.example.swp_smms.model.payload.response.ChildData(sp.student.accountId, sp.student.fullName) " +
+    @Query("SELECT new com.example.swp_smms.model.payload.response.ChildData(sp.student.accountId, sp.student.fullName, sp.student.clazz.classId) " +
             "FROM StudentParent sp WHERE sp.parent.accountId = :parentAccountId")
     List<ChildData> findChildrenAccounts(@Param("parentAccountId") UUID parentAccountId);
 
+    @Query("SELECT DISTINCT new com.example.swp_smms.model.payload.response.ChildData(a.accountId, a.fullName, a.clazz.classId) " +
+            "FROM Account a JOIN a.medicationSents ms " +
+            "WHERE :today >= ms.startDate AND :today <= ms.endDate")
+    List<ChildData> findStudentsWithOngoingMedication(@Param("today") String today);
 
 }

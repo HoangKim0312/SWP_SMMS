@@ -64,6 +64,16 @@ public class MedicalProfileController {
 
         return ResponseEntity.ok(response); // 200 OK with the list of profiles
     }
+    
+    @DeleteMapping("/delete/{studentId}/{medicalProfileId}")
+    public ResponseEntity<Object> deleteMedicalProfile(
+            @PathVariable UUID studentId,
+            @PathVariable Long medicalProfileId) {
+
+        medicalProfileService.deleteMedicalProfile(studentId, medicalProfileId);
+
+        return ResponseEntity.ok("Medical profile deleted successfully");
+    }
 
 
 

@@ -15,6 +15,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"message\": \"You need to log in to access this resource\"}");
+        String path = request.getRequestURI();
+        if (path.contains("/api/v1/auth/login")) {
+            response.getWriter().write("{\"message\": \"Invalid email or password\"}");
+        } else {
+            response.getWriter().write("{\"message\": \"You need to log in to access this resource\"}");
+        }
     }
 } 

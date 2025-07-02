@@ -92,6 +92,12 @@ public class Account {
     @OneToMany(mappedBy = "parent")
     private List<VaccinationConfirmation> parentVaccinationConfirmations;
     
+    @Column(name = "email_notifications_enabled")
+    private Boolean emailNotificationsEnabled = true;
+
+    @Column(name = "notification_types")
+    private String notificationTypes = "FOLLOW_UP,EMERGENCY";
+    
     public boolean isLocked() {
         return locked;
     }

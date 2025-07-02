@@ -10,7 +10,6 @@ public class MedicalProfileRequest {
     private String chronicDiseases;
     private String hearingStatus;
     private String immunizationStatus;
-    private String lastUpdated;
     private String pastTreatments;
     private String visionStatusLeft;
     private String visionStatusRight;

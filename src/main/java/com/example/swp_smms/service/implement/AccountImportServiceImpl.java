@@ -45,29 +45,23 @@ public class AccountImportServiceImpl implements AccountImportService {
         try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
             Sheet sheet = workbook.getSheetAt(0);
             
-            // Get role from first data row (not header)
-            Row firstDataRow = sheet.getRow(1); // Skip header row (index 0)
-            if (firstDataRow == null) {
-                throw new IllegalArgumentException("Excel file is empty or has no data rows");
-            }
+            // Validate Excel structure
+            validateExcelStructure(sheet);
             
-            String roleName = getCellValueAsString(firstDataRow.getCell(4));
-            logger.info("Attempting to find role with name: {}", roleName);
+            // Ensure all roles exist in database first
+            ensureRolesExist();
             
             // List all available roles for debugging
             List<Role> allRoles = roleRepository.findAll();
             logger.info("Available roles in database: {}", 
                 allRoles.stream().map(Role::getRoleName).collect(Collectors.joining(", ")));
-            
-            Role role = roleRepository.findByRoleName(roleName)
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid role in Excel file: " + roleName));
 
             // Process all rows except header
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
                 if (row == null) continue;
 
-                ImportAccountResponse.ImportAccountResult result = processRow(row, role);
+                ImportAccountResponse.ImportAccountResult result = processRow(row);
                 results.add(result);
 
                 if (result.isSuccess()) {
@@ -88,7 +82,48 @@ public class AccountImportServiceImpl implements AccountImportService {
                 .build();
     }
 
-    private ImportAccountResponse.ImportAccountResult processRow(Row row, Role role) {
+    /**
+     * Validates the Excel file structure
+     */
+    private void validateExcelStructure(Sheet sheet) {
+        if (sheet.getLastRowNum() < 1) {
+            throw new IllegalArgumentException("Excel file must have at least a header row and one data row");
+        }
+
+        Row headerRow = sheet.getRow(0);
+        if (headerRow == null) {
+            throw new IllegalArgumentException("Header row is missing");
+        }
+
+        // Check if we have at least 5 columns (email, firstName, lastName, phone, roleName)
+        if (headerRow.getLastCellNum() < 5) {
+            throw new IllegalArgumentException("Excel file must have at least 5 columns: Email, First Name, Last Name, Phone, Role Name");
+        }
+
+        logger.info("Excel structure validated. Columns: {}", headerRow.getLastCellNum());
+    }
+
+    /**
+     * Ensures all roles from RoleEnum exist in the database
+     */
+    private void ensureRolesExist() {
+        List<Role> existingRoles = roleRepository.findAll();
+        List<String> existingRoleNames = existingRoles.stream()
+                .map(Role::getRoleName)
+                .collect(Collectors.toList());
+
+        for (RoleEnum roleEnum : RoleEnum.values()) {
+            if (!existingRoleNames.contains(roleEnum.getRoleName())) {
+                Role newRole = new Role();
+                newRole.setRoleName(roleEnum.getRoleName());
+                newRole.setDescription("Role for " + roleEnum.getRoleName());
+                roleRepository.save(newRole);
+                logger.info("Created new role: {}", roleEnum.getRoleName());
+            }
+        }
+    }
+
+    private ImportAccountResponse.ImportAccountResult processRow(Row row) {
         ImportAccountResponse.ImportAccountResult.ImportAccountResultBuilder resultBuilder = 
             ImportAccountResponse.ImportAccountResult.builder();
 
@@ -97,16 +132,17 @@ public class AccountImportServiceImpl implements AccountImportService {
             String firstName = getCellValueAsString(row.getCell(1));
             String lastName = getCellValueAsString(row.getCell(2));
             String phone = getCellValueAsString(row.getCell(3));
+            String roleName = getCellValueAsString(row.getCell(4));
 
             // Validate required fields
-            if (email == null || firstName == null || lastName == null) {
+            if (email == null || firstName == null || lastName == null || roleName == null) {
                 return resultBuilder
                     .email(email)
                     .firstName(firstName)
                     .lastName(lastName)
                     .phone(phone)
                     .success(false)
-                    .errorMessage("Missing required fields")
+                    .errorMessage("Missing required fields (email, firstName, lastName, roleName)")
                     .build();
             }
 
@@ -119,6 +155,27 @@ public class AccountImportServiceImpl implements AccountImportService {
                     .phone(phone)
                     .success(false)
                     .errorMessage("Email already exists")
+                    .build();
+            }
+
+            // Find role by name (case-insensitive)
+            logger.info("Looking for role: '{}'", roleName);
+            Role role = roleRepository.findByRoleName(roleName)
+                    .orElseGet(() -> {
+                        logger.info("Exact match not found, trying case-insensitive search for: '{}'", roleName);
+                        return roleRepository.findByRoleNameIgnoreCase(roleName)
+                                .orElse(null);
+                    });
+
+            if (role == null) {
+                return resultBuilder
+                    .email(email)
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .phone(phone)
+                    .success(false)
+                    .errorMessage("Invalid role: " + roleName + ". Available roles: " + 
+                        roleRepository.findAll().stream().map(Role::getRoleName).collect(Collectors.joining(", ")))
                     .build();
             }
 

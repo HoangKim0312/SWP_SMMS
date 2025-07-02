@@ -23,6 +23,8 @@ public class MedicationServiceImpl implements MedicationService {
         medication.setName(request.getName());
         medication.setDescription(request.getDescription());
         medication.setQuantity(request.getQuantity());
+        medication.setQuantityType(request.getQuantityType());
+        medication.setMedicationType(request.getMedicationType());
         medication.setExpiryDate(request.getExpiryDate());
 
         Medication savedMedication = medicationRepository.save(medication);
@@ -65,6 +67,8 @@ public class MedicationServiceImpl implements MedicationService {
         medication.setName(request.getName());
         medication.setDescription(request.getDescription());
         medication.setQuantity(request.getQuantity());
+        medication.setQuantityType(request.getQuantityType());
+        medication.setMedicationType(request.getMedicationType());
         medication.setExpiryDate(request.getExpiryDate());
 
         Medication updatedMedication = medicationRepository.save(medication);
@@ -85,6 +89,8 @@ public class MedicationServiceImpl implements MedicationService {
                 .name(medication.getName())
                 .description(medication.getDescription())
                 .quantity(medication.getQuantity())
+                .quantityType(medication.getQuantityType())
+                .medicationType(medication.getMedicationType())
                 .expiryDate(medication.getExpiryDate())
                 .build();
     }
