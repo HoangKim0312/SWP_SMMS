@@ -13,6 +13,4 @@ public interface HealthCheckRecordRepository extends JpaRepository<HealthCheckRe
     List<HealthCheckRecord> findByNurse_AccountId(UUID nurseId);
     List<HealthCheckRecord> findByRecordId(Long recordId);
     List<HealthCheckRecord> findByHealthCheckNotice_CheckNoticeId(Long checkNoticeId);
-    List<HealthCheckRecord> findByDate(String date);
-    List<HealthCheckRecord> findByHealthCheckNotice_TitleContainingIgnoreCase(String title);
 } 

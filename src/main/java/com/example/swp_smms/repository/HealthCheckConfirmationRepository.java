@@ -14,6 +14,4 @@ public interface HealthCheckConfirmationRepository extends JpaRepository<HealthC
     List<HealthCheckConfirmation> findByHealthCheckNotice_CheckNoticeId(Long checkNoticeId);
     List<HealthCheckConfirmation> findByStatus(String status);
     List<HealthCheckConfirmation> findByConfirmationId(Long confirmationId);
-    List<HealthCheckConfirmation> findByConfirmedAt(String confirmedAt);
-    List<HealthCheckConfirmation> findByHealthCheckNotice_TitleContainingIgnoreCase(String title);
 } 
