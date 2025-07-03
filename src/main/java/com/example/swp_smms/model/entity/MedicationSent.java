@@ -5,12 +5,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "MedicationSent")
 public class MedicationSent {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "med_sent_id")
@@ -24,27 +27,12 @@ public class MedicationSent {
     @JoinColumn(name = "parent_id", referencedColumnName = "account_id")
     private Account parent;
 
-    @Column(name = "medication_name")
-    private String medicationName;
+    @Column(name = "request_date") // Only today or tomorrow
+    private String requestDate;
 
-    @Column(name = "instructions")
-    private String instructions;
-
-    @Column(name = "start_date")
-    private String startDate;
-
-    @Column(name = "end_date")
-    private String endDate;
-
-    @Column(name = "frequency_per_day")
-    private Integer frequencyPerDay;
-
-    @Column(name = "timing_notes")
-    private String timingNotes;
-
-    @Column(name = "sent_at")
+    @Column(name = "sent_at") // When the parent submitted the request
     private String sentAt;
 
-    @Column(name = "amount")
-    private Integer amount;
-} 
+    @OneToMany(mappedBy = "medicationSent")
+    private List<Dosage> dosages;
+}

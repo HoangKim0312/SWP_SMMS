@@ -1,16 +1,10 @@
 package com.example.swp_smms.model.payload.request;
 
 import lombok.Data;
-
-import java.util.UUID;
+import java.util.List;
 
 @Data
 public class MedicationSentRequest {
-    private String medicationName;
-    private String instructions;
-    private String startDate;
-    private String endDate;
-    private Integer frequencyPerDay;
-    private String timingNotes;
-    private Integer amount;
+    private String requestDate; // Only today or tomorrow (expected in format "yyyy-MM-dd")
+    private List<DosageRequest> dosages;
 }

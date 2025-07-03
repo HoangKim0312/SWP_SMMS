@@ -30,7 +30,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     @Query("SELECT DISTINCT new com.example.swp_smms.model.payload.response.ChildData(a.accountId, a.fullName, a.clazz.classId) " +
             "FROM Account a JOIN a.medicationSents ms " +
-            "WHERE :today >= ms.startDate AND :today <= ms.endDate")
+            "WHERE :today = ms.sentAt")
     List<ChildData> findStudentsWithOngoingMedication(@Param("today") String today);
 
 }
