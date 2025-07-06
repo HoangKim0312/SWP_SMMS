@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface HealthCheckNoticeRepository extends JpaRepository<HealthCheckNotice, Long> {
     List<HealthCheckNotice> findByCheckNoticeId(Long checkNoticeId);
+    List<HealthCheckNotice> findByDate(String date);
+    List<HealthCheckNotice> findByTitleContainingIgnoreCase(String title);
 } 
