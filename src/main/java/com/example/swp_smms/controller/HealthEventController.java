@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/healthEvents")
+@RequestMapping("/api/v1/healthEvents")
 public class HealthEventController {
 
     @Autowired
@@ -35,7 +35,7 @@ public class HealthEventController {
         );
     }
 
-    @GetMapping("/all")
+    @GetMapping("/get-all")
     public ResponseEntity<Object> getAllHealthEvents() {
         List<HealthEventResponse> events = healthEventService.viewAllHealthEvents();
         return ResponseBuilder.responseBuilderWithData(
@@ -45,7 +45,7 @@ public class HealthEventController {
         );
     }
 
-    @GetMapping("/by-date/{eventDate}")
+    @GetMapping("/get-by-date/{eventDate}")
     public ResponseEntity<Object> getHealthEventsByDate(@PathVariable String eventDate) {
         List<HealthEventResponse> events = healthEventService.viewHealthEventsByDate(eventDate);
         return ResponseBuilder.responseBuilderWithData(
