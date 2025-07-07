@@ -10,4 +10,6 @@ public interface HealthEventService {
     HealthEventResponse createHealthEvent(UUID studentID, UUID nurseID, HealthEventRequest healthEventRequest);
     List<HealthEventResponse> viewAllHealthEvents();
     List<HealthEventResponse> viewHealthEventsByDate(String eventDate);
+    HealthEventResponse updateHealthEvent(Long eventId, HealthEventRequest healthEventRequest);
+    void deleteHealthEvent(Long eventId);
 }

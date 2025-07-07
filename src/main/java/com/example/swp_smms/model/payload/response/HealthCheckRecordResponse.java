@@ -11,14 +11,11 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VaccinationRecordResponse {
+public class HealthCheckRecordResponse {
     private Long recordId;
     private UUID studentId;
-    private String studentName;
     private UUID nurseId;
-    private String nurseName;
-    private Long vaccineNoticeId;
-    private String vaccineName;
+    private Long checkNoticeId;
     private String results;
     private String date;
 } 

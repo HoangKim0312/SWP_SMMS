@@ -23,7 +23,7 @@ public class Class {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "school_year")
+    @Column(name = "school-year")
     private int schoolYear;
     
     @OneToMany(mappedBy = "clazz")
