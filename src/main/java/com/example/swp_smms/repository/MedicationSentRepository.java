@@ -12,16 +12,18 @@ import java.util.UUID;
 
 @Repository
 public interface MedicationSentRepository extends JpaRepository<MedicationSent, Long> {
+
     @Query("SELECT m FROM MedicationSent m " +
             "WHERE m.student.accountId = :studentId " +
-            "AND :currentDate = m.sentAt")
+            "AND m.sentAt = :currentDate " +
+            "AND m.isActive = true")
     List<MedicationSent> findActiveMedicationsByStudentIdAndDate(
             @Param("studentId") UUID studentId,
             @Param("currentDate") String currentDate);
 
-
     @Query("SELECT m FROM MedicationSent m " +
-            "WHERE m.student.accountId = :studentId ")
+            "WHERE m.student.accountId = :studentId " +
+            "AND m.isActive = true")
     List<MedicationSent> findAllByStudentId(
             @Param("studentId") UUID studentId);
 
@@ -30,8 +32,8 @@ public interface MedicationSentRepository extends JpaRepository<MedicationSent, 
     void deleteByStudentIdAndMedicationSentId(@Param("studentId") UUID studentId,
                                               @Param("medicationSentId") Long medicationSentId);
 
-    @Query("SELECT m FROM MedicationSent m WHERE m.sentAt = :today")
+    @Query("SELECT m FROM MedicationSent m " +
+            "WHERE m.sentAt = :today " +
+            "AND m.isActive = true")
     List<MedicationSent> findAllActiveMedications(@Param("today") String today);
-
-
 }

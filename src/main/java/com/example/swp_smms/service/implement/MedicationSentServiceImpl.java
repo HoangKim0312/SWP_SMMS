@@ -79,20 +79,17 @@ public class MedicationSentServiceImpl implements MedicationSentService {
 
     @Override
     public void deleteMedicationSent(UUID studentId, Long medicationSentId) {
-        boolean exists = medicationSentRepository.existsById(medicationSentId);
-        if (!exists) {
-            throw new RuntimeException("MedicalSent not found with ID: " + medicationSentId);
-        }
-
-        // Optional: Check that the profile belongs to the student
         MedicationSent medicationSent = medicationSentRepository.findById(medicationSentId)
-                .orElseThrow(() -> new RuntimeException("MedicalSent not found"));
+                .orElseThrow(() -> new RuntimeException("MedicationSent not found with ID: " + medicationSentId));
 
+        // Validate student ownership
         if (!medicationSent.getStudent().getAccountId().equals(studentId)) {
-            throw new RuntimeException("This medSent does not belong to the specified student.");
+            throw new RuntimeException("This MedicationSent does not belong to the specified student.");
         }
 
-        medicationSentRepository.deleteByStudentIdAndMedicationSentId(studentId, medicationSentId);
+        // Soft delete: mark as inactive
+        medicationSent.setActive(false);
+        medicationSentRepository.save(medicationSent);
     }
 
 

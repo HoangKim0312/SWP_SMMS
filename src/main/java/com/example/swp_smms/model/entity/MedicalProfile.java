@@ -46,6 +46,9 @@ public class MedicalProfile {
     private String immunizationStatus;
 
 
+    @Column(name = "is_active")
+    private boolean isActive = true; // Default to true
+
     //yyyy-MM-dd
     @Column(name = "last_updated")
     private String lastUpdated;

@@ -33,6 +33,9 @@ public class MedicationSent {
     @Column(name = "sent_at") // When the parent submitted the request
     private String sentAt;
 
+    @Column(name = "is_active")
+    private boolean isActive = true; // Default to true
+
     @OneToMany(mappedBy = "medicationSent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Dosage> dosages;
 
