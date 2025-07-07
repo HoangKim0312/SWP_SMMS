@@ -33,6 +33,7 @@ public class MedicationSent {
     @Column(name = "sent_at") // When the parent submitted the request
     private String sentAt;
 
-    @OneToMany(mappedBy = "medicationSent")
+    @OneToMany(mappedBy = "medicationSent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Dosage> dosages;
+
 }

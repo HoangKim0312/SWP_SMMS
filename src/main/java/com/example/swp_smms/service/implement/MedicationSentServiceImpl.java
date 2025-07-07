@@ -4,9 +4,7 @@ import com.example.swp_smms.model.entity.*;
 import com.example.swp_smms.model.payload.request.DosageRequest;
 import com.example.swp_smms.model.payload.request.MedicationItemRequest;
 import com.example.swp_smms.model.payload.request.MedicationSentRequest;
-import com.example.swp_smms.model.payload.response.ChildData;
-import com.example.swp_smms.model.payload.response.ListMedicationSentResponse;
-import com.example.swp_smms.model.payload.response.MedicationSentResponse;
+import com.example.swp_smms.model.payload.response.*;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.MedicalProfileRepository;
 import com.example.swp_smms.repository.MedicationSentRepository;
@@ -123,19 +121,21 @@ public class MedicationSentServiceImpl implements MedicationSentService {
     public MedicationSentResponse createMedicationSent(UUID studentId, UUID parentId, MedicationSentRequest request) {
         String sentAt = LocalDate.now().toString();
 
+        // Validate parent-child relationship
         List<ChildData> children = accountRepository.findChildrenAccounts(parentId);
         boolean isChild = children.stream()
                 .anyMatch(child -> child.getChildId().equals(studentId));
-
         if (!isChild) {
             throw new RuntimeException("This student does not belong to the specified parent.");
         }
 
+        // Fetch student and parent accounts
         Account student = accountRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
         Account parent = accountRepository.findById(parentId)
                 .orElseThrow(() -> new RuntimeException("Parent not found"));
 
+        // Build MedicationSent entity
         MedicationSent medSent = new MedicationSent();
         medSent.setStudent(student);
         medSent.setParent(parent);
@@ -156,6 +156,7 @@ public class MedicationSentServiceImpl implements MedicationSentService {
                 item.setAmount(itemRequest.getAmount());
                 itemList.add(item);
             }
+
             dosage.setMedicationItems(itemList);
             dosageList.add(dosage);
         }
@@ -163,7 +164,31 @@ public class MedicationSentServiceImpl implements MedicationSentService {
         medSent.setDosages(dosageList);
         MedicationSent saved = medicationSentRepository.save(medSent);
 
-        return modelMapper.map(saved, MedicationSentResponse.class);
+        // ✅ Manually map to response DTO
+        MedicationSentResponse response = new MedicationSentResponse();
+        response.setMedSentId(saved.getMedSentId());
+        response.setStudentId(saved.getStudent().getAccountId());
+        response.setParentId(saved.getParent().getAccountId());
+        response.setRequestDate(saved.getRequestDate());
+        response.setSentAt(saved.getSentAt());
+
+        List<DosageResponse> dosageResponses = saved.getDosages().stream().map(dosage -> {
+            DosageResponse dr = new DosageResponse();
+            dr.setTimingNotes(dosage.getTimingNotes());
+
+            List<MedicationItemResponse> itemResponses = dosage.getMedicationItems().stream().map(item -> {
+                MedicationItemResponse ir = new MedicationItemResponse();
+                ir.setMedicationName(item.getMedicationName());
+                ir.setAmount(item.getAmount());
+                return ir;
+            }).toList();
+
+            dr.setMedicationItems(itemResponses);
+            return dr;
+        }).toList();
+
+        response.setDosages(dosageResponses);
+        return response;
     }
 
     @Override

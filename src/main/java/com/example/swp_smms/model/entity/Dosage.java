@@ -25,7 +25,7 @@ public class Dosage {
 
     @Column(name = "timing_notes", nullable = false)
     private String timingNotes; // e.g., "Before lunch", "After dinner"
-
+    
     @OneToMany(mappedBy = "dosage", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<MedicationItem> medicationItems;
 }

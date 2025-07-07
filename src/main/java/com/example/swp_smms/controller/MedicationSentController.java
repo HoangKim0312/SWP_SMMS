@@ -21,16 +21,16 @@ public class MedicationSentController {
     private final MedicationSentService medicationSentService;
 
     @PostMapping("/create/{studentId}/{parentId}")
-    public ResponseEntity<MedicationSentResponse> createMedicationSent(
+    public ResponseEntity<?> createMedicationSent(
             @PathVariable UUID studentId,
             @PathVariable UUID parentId,
             @RequestBody MedicationSentRequest request) {
-
         try {
             MedicationSentResponse response = medicationSentService.createMedicationSent(studentId, parentId, request);
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // or custom error response
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Failed to create MedicationSent: " + e.getMessage());
         }
     }
 
