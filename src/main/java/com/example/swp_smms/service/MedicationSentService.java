@@ -20,5 +20,7 @@ public interface MedicationSentService {
 
     ListMedicationSentResponse getAllActiveMedicationSentsForAllStudents();
 
+    MedicationSentResponse getMedicationSentById(UUID studentId, Long medicationSentId);
+
 
 }

@@ -223,5 +223,45 @@ public class MedicationSentServiceImpl implements MedicationSentService {
         return modelMapper.map(saved, MedicationSentResponse.class);
     }
 
+    @Override
+    public MedicationSentResponse getMedicationSentById(UUID studentId, Long medicationSentId) {
+        MedicationSent entity = medicationSentRepository.findById(medicationSentId)
+                .orElseThrow(() -> new RuntimeException("MedicationSent not found"));
+
+        // Ensure it belongs to the student and is active
+        if (!entity.getStudent().getAccountId().equals(studentId)) {
+            throw new RuntimeException("This MedicationSent does not belong to the specified student.");
+        }
+
+        if (!entity.isActive()) {
+            throw new RuntimeException("This MedicationSent is inactive.");
+        }
+
+        MedicationSentResponse response = new MedicationSentResponse();
+        response.setMedSentId(entity.getMedSentId());
+        response.setStudentId(entity.getStudent().getAccountId());
+        response.setParentId(entity.getParent().getAccountId());
+        response.setRequestDate(entity.getRequestDate());
+        response.setSentAt(entity.getSentAt());
+
+        List<DosageResponse> dosageResponses = entity.getDosages().stream().map(dosage -> {
+            DosageResponse dr = new DosageResponse();
+            dr.setTimingNotes(dosage.getTimingNotes());
+
+            List<MedicationItemResponse> itemResponses = dosage.getMedicationItems().stream().map(item -> {
+                MedicationItemResponse ir = new MedicationItemResponse();
+                ir.setMedicationName(item.getMedicationName());
+                ir.setAmount(item.getAmount());
+                return ir;
+            }).toList();
+
+            dr.setMedicationItems(itemResponses);
+            return dr;
+        }).toList();
+
+        response.setDosages(dosageResponses);
+        return response;
+    }
+
 
 }

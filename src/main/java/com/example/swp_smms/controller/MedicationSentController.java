@@ -98,6 +98,18 @@ public class MedicationSentController {
         return ResponseEntity.ok(response); // 200 OK
     }
 
+    @GetMapping("/student/{studentId}/med-sent/{medicationSentId}")
+    public ResponseEntity<MedicationSentResponse> getMedicationSentById(
+            @PathVariable UUID studentId,
+            @PathVariable Long medicationSentId) {
+        try {
+            MedicationSentResponse response = medicationSentService.getMedicationSentById(studentId, medicationSentId);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
 
 
 }
