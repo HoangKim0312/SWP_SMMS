@@ -42,7 +42,7 @@ public class HealthCheckConfirmationServiceImpl implements HealthCheckConfirmati
         confirmation.setStudent(student);
         confirmation.setParent(parent);
         confirmation.setStatus(request.getStatus());
-        confirmation.setConfirmedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        confirmation.setConfirmedAt(LocalDateTime.now());
 
         HealthCheckConfirmation savedConfirmation = confirmationRepository.save(confirmation);
         return mapToResponse(savedConfirmation);
@@ -91,7 +91,7 @@ public class HealthCheckConfirmationServiceImpl implements HealthCheckConfirmati
     }
 
     @Override
-    public List<HealthCheckConfirmationResponse> getConfirmationsByDate(String confirmedAt) {
+    public List<HealthCheckConfirmationResponse> getConfirmationsByDate(LocalDateTime confirmedAt) {
         return confirmationRepository.findByConfirmedAt(confirmedAt).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
@@ -122,7 +122,7 @@ public class HealthCheckConfirmationServiceImpl implements HealthCheckConfirmati
         confirmation.setStudent(student);
         confirmation.setParent(parent);
         confirmation.setStatus(request.getStatus());
-        confirmation.setConfirmedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        confirmation.setConfirmedAt(LocalDateTime.now());
 
         HealthCheckConfirmation updatedConfirmation = confirmationRepository.save(confirmation);
         return mapToResponse(updatedConfirmation);

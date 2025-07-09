@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -38,7 +39,8 @@ public class HealthCheckNoticeController {
 
     @GetMapping("/getBydate/{date}")
     public Object getNoticesByDate(@PathVariable String date) {
-        List<HealthCheckNoticeResponse> response = noticeService.getNoticesByDate(date);
+        LocalDate parsedDate = LocalDate.parse(date);
+        List<HealthCheckNoticeResponse> response = noticeService.getNoticesByDate(parsedDate);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Health check notices by date fetched successfully", response);
     }
 

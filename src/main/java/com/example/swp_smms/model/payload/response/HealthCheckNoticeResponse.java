@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -13,6 +15,6 @@ public class HealthCheckNoticeResponse {
     private Long checkNoticeId;
     private String title;
     private String description;
-    private String date;
-    private String createdAt;
+    private LocalDate date;
+    private LocalDateTime createdAt;
 } 

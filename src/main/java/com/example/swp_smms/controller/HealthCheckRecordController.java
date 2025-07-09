@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,7 +60,8 @@ public class HealthCheckRecordController {
 
     @GetMapping("/getByDate/{date}")
     public Object getRecordsByDate(@PathVariable String date) {
-        List<HealthCheckRecordResponse> response = recordService.getRecordsByDate(date);
+        LocalDate parsedDate = LocalDate.parse(date);
+        List<HealthCheckRecordResponse> response = recordService.getRecordsByDate(parsedDate);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Health check records by date fetched successfully", response);
     }
 

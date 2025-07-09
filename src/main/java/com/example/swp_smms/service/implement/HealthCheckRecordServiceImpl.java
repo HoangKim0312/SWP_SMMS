@@ -13,6 +13,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -50,6 +51,11 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
         
         // Map request to entity
         HealthCheckRecord record = modelMapper.map(request, HealthCheckRecord.class);
+        
+        // If request.getDate() is not null, parse it
+        if (request.getDate() != null) {
+            record.setDate(LocalDate.parse(request.getDate()));
+        }
         
         // Set related entities
         Account student = accountRepository.findAccountByAccountId(studentId);
@@ -146,7 +152,7 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
     }
 
     @Override
-    public List<HealthCheckRecordResponse> getRecordsByDate(String date) {
+    public List<HealthCheckRecordResponse> getRecordsByDate(LocalDate date) {
         List<HealthCheckRecord> records = healthCheckRecordRepository.findByDate(date);
         return records.stream()
                 .map(record -> {
@@ -182,23 +188,21 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
         
         // Update fields from request
         record.setResults(request.getTitle()); // Assuming title maps to results
-        record.setDate(request.getDate());
-        
+        if (request.getDate() != null) {
+            record.setDate(java.time.LocalDate.parse(request.getDate()));
+        }
         // Update health check notice if provided
         if (request.getHealthCheckNoticeId() != null) {
             HealthCheckNotice notice = healthCheckNoticeRepository.findById(request.getHealthCheckNoticeId())
                     .orElseThrow(() -> new RuntimeException("Health check notice not found with id: " + request.getHealthCheckNoticeId()));
             record.setHealthCheckNotice(notice);
         }
-        
         HealthCheckRecord updatedRecord = healthCheckRecordRepository.save(record);
-        
         HealthCheckRecordResponse response = modelMapper.map(updatedRecord, HealthCheckRecordResponse.class);
         response.setRecordId(updatedRecord.getRecordId());
         response.setStudentId(updatedRecord.getStudent().getAccountId());
         response.setNurseId(updatedRecord.getNurse().getAccountId());
         response.setCheckNoticeId(updatedRecord.getHealthCheckNotice().getCheckNoticeId());
-        
         return response;
     }
 

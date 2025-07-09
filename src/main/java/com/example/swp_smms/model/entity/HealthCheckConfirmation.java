@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,5 +34,5 @@ public class HealthCheckConfirmation {
     private String status;
 
     @Column(name = "confirmed_at")
-    private String confirmedAt;
+    private LocalDateTime confirmedAt;
 } 

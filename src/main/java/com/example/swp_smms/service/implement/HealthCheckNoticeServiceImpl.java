@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -29,9 +30,9 @@ public class HealthCheckNoticeServiceImpl implements HealthCheckNoticeService {
         HealthCheckNotice notice = modelMapper.map(request, HealthCheckNotice.class);
         
         // Set current date and time
-        String currentDateTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        LocalDateTime currentDateTime = LocalDateTime.now();
         notice.setCreatedAt(currentDateTime);
-        notice.setDate(currentDateTime);
+        notice.setDate(currentDateTime.toLocalDate());
         
         // Save to DB
         HealthCheckNotice savedNotice = healthCheckNoticeRepository.save(notice);
@@ -67,7 +68,7 @@ public class HealthCheckNoticeServiceImpl implements HealthCheckNoticeService {
     }
 
     @Override
-    public List<HealthCheckNoticeResponse> getNoticesByDate(String date) {
+    public List<HealthCheckNoticeResponse> getNoticesByDate(LocalDate date) {
         List<HealthCheckNotice> notices = healthCheckNoticeRepository.findByDate(date);
         return notices.stream()
                 .map(notice -> {

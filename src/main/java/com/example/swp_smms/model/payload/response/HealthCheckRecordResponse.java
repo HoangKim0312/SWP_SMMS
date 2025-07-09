@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.UUID;
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -17,5 +18,5 @@ public class HealthCheckRecordResponse {
     private UUID nurseId;
     private Long checkNoticeId;
     private String results;
-    private String date;
+    private LocalDate date;
 } 

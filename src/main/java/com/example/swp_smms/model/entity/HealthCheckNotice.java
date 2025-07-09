@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,8 +26,8 @@ public class HealthCheckNotice {
     private String description;
 
     @Column(name = "date")
-    private String date;
+    private LocalDate date;
 
     @Column(name = "created_at")
-    private String createdAt;
+    private LocalDateTime createdAt;
 } 

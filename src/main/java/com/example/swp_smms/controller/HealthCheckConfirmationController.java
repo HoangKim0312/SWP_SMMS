@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -63,7 +64,8 @@ public class HealthCheckConfirmationController {
 
     @GetMapping("/getByDate/{confirmedAt}")
     public Object getConfirmationsByDate(@PathVariable String confirmedAt) {
-        List<HealthCheckConfirmationResponse> response = confirmationService.getConfirmationsByDate(confirmedAt);
+        LocalDateTime parsedDateTime = LocalDateTime.parse(confirmedAt);
+        List<HealthCheckConfirmationResponse> response = confirmationService.getConfirmationsByDate(parsedDateTime);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Health check confirmations by date fetched successfully", response);
     }
 

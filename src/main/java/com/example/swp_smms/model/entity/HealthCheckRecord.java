@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -32,5 +33,5 @@ public class HealthCheckRecord {
     private String results;
 
     @Column(name = "date")
-    private String date;
+    private LocalDate date;
 } 
