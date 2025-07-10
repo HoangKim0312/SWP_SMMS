@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -28,13 +29,16 @@ public class MedicationSent {
     private Account parent;
 
     @Column(name = "request_date") // Only today or tomorrow
-    private String requestDate;
+    private LocalDate requestDate;
 
     @Column(name = "sent_at") // When the parent submitted the request
-    private String sentAt;
+    private LocalDate sentAt;
 
     @Column(name = "is_active")
     private boolean isActive = true; // Default to true
+
+    @Column(name = "is_accepted")
+    private Boolean isAccepted = null; // Default to null
 
     @OneToMany(mappedBy = "medicationSent", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Dosage> dosages;

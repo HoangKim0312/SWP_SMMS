@@ -1,16 +1,19 @@
 package com.example.swp_smms.controller;
 
 import com.example.swp_smms.model.exception.ResponseBuilder;
+import com.example.swp_smms.model.payload.request.AcceptMedicationSentRequest;
 import com.example.swp_smms.model.payload.request.MedicationSentRequest;
 import com.example.swp_smms.model.payload.response.ListMedicationSentResponse;
 import com.example.swp_smms.model.payload.response.MedicationSentResponse;
 import com.example.swp_smms.service.MedicationSentService;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
@@ -108,6 +111,48 @@ public class MedicationSentController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+
+    @PatchMapping("/nurse/accept/{medicationSentId}")
+    public ResponseEntity<?> updateMedicationSentAcceptance(
+            @PathVariable Long medicationSentId,
+            @RequestBody AcceptMedicationSentRequest request) {
+        try {
+            medicationSentService.updateMedicationSentAcceptance(medicationSentId, request.getIsAccepted());
+            return ResponseEntity.ok("MedicationSent has been " +
+                    (request.getIsAccepted() ? "accepted" : "rejected") + " successfully.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/accepted")
+    public ResponseEntity<ListMedicationSentResponse> getAllAcceptedMedicationSents(
+            @RequestParam(required = false) UUID studentId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        ListMedicationSentResponse response = medicationSentService.getAcceptedMedicationSents(studentId, date);
+
+        if (response.getMedicationSentList().isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204
+        }
+
+        return ResponseEntity.ok(response); // 200
+    }
+
+
+    @GetMapping("/declined")
+    public ResponseEntity<ListMedicationSentResponse> getDeclinedMedicationSents(
+            @RequestParam(required = false) UUID studentId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate requestDate) {
+
+        ListMedicationSentResponse response = medicationSentService.getDeclinedMedicationSents(studentId, requestDate);
+
+        if (response.getMedicationSentList().isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+
+        return ResponseEntity.ok(response);
     }
 
 

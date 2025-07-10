@@ -20,11 +20,8 @@ public class NurseServiceImpl implements NurseService {
 
     @Override
     public List<ChildData> getAllStudentsWithOngoingMedicationSent() {
-        String today = LocalDate.now().toString(); // Format: YYYY-MM-DD
-
-        // Native or JPQL query via a custom repository method
+        LocalDate today = LocalDate.now();
         List<ChildData> students = accountRepository.findStudentsWithOngoingMedication(today);
-
         return students;
     }
 }
