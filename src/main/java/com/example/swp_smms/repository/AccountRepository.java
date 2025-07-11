@@ -34,5 +34,9 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
             "WHERE ms.requestDate = :today AND ms.isActive = true")
     List<ChildData> findStudentsWithOngoingMedication(@Param("today") LocalDate today);
 
+    @Query("SELECT new com.example.swp_smms.model.payload.response.ChildData(a.accountId, a.fullName, a.clazz.classId) " +
+            "FROM Account a " +
+            "WHERE a.role.roleId = 1 AND a.clazz.classId = :classId")
+    List<ChildData> findChildDataByClassId(@Param("classId") Long classId);
 
 }
