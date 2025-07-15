@@ -11,6 +11,6 @@ public class HealthCheckNoticeRequest {
     @NotBlank(message = "Description is required")
     private String description;
 
-    @NotBlank(message = "Status is required")
-    private String status;
+    @NotBlank(message = "Notice date is required")
+    private String date;
 }

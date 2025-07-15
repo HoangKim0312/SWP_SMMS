@@ -187,9 +187,9 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
                 .orElseThrow(() -> new RuntimeException("Health check record not found with id: " + recordId));
         
         // Update fields from request
-        record.setResults(request.getTitle()); // Assuming title maps to results
+        record.setResults(request.getResult()); // Assuming title maps to results
         if (request.getDate() != null) {
-            record.setDate(java.time.LocalDate.parse(request.getDate()));
+            record.setDate(LocalDate.parse(request.getDate()));
         }
         // Update health check notice if provided
         if (request.getHealthCheckNoticeId() != null) {
