@@ -63,7 +63,9 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
         record.setStudent(student);
         record.setNurse(nurse);
         record.setHealthCheckNotice(notice);
-        
+
+        record.setResults(request.getResult());
+
         // Save to DB
         HealthCheckRecord savedRecord = healthCheckRecordRepository.save(record);
         
@@ -166,20 +168,6 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<HealthCheckRecordResponse> getRecordsByTitle(String title) {
-        List<HealthCheckRecord> records = healthCheckRecordRepository.findByHealthCheckNotice_TitleContainingIgnoreCase(title);
-        return records.stream()
-                .map(record -> {
-                    HealthCheckRecordResponse response = modelMapper.map(record, HealthCheckRecordResponse.class);
-                    response.setRecordId(record.getRecordId());
-                    response.setStudentId(record.getStudent().getAccountId());
-                    response.setNurseId(record.getNurse().getAccountId());
-                    response.setCheckNoticeId(record.getHealthCheckNotice().getCheckNoticeId());
-                    return response;
-                })
-                .collect(Collectors.toList());
-    }
 
     @Override
     public HealthCheckRecordResponse updateRecord(Long recordId, HealthCheckRecordRequest request) {
@@ -187,7 +175,7 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
                 .orElseThrow(() -> new RuntimeException("Health check record not found with id: " + recordId));
         
         // Update fields from request
-        record.setResults(request.getResult()); // Assuming title maps to results
+        record.setResults(request.getResult());
         if (request.getDate() != null) {
             record.setDate(LocalDate.parse(request.getDate()));
         }
@@ -197,12 +185,17 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
                     .orElseThrow(() -> new RuntimeException("Health check notice not found with id: " + request.getHealthCheckNoticeId()));
             record.setHealthCheckNotice(notice);
         }
+        // Save updated record
         HealthCheckRecord updatedRecord = healthCheckRecordRepository.save(record);
+
+        // Map to response
         HealthCheckRecordResponse response = modelMapper.map(updatedRecord, HealthCheckRecordResponse.class);
         response.setRecordId(updatedRecord.getRecordId());
         response.setStudentId(updatedRecord.getStudent().getAccountId());
         response.setNurseId(updatedRecord.getNurse().getAccountId());
         response.setCheckNoticeId(updatedRecord.getHealthCheckNotice().getCheckNoticeId());
+        response.setResults(updatedRecord.getResults());
+        response.setDate(updatedRecord.getDate());
         return response;
     }
 

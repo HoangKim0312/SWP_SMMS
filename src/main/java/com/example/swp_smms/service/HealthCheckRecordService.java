@@ -15,7 +15,7 @@ public interface HealthCheckRecordService {
     List<HealthCheckRecordResponse> getRecordsByNurse(UUID nurseId);
     List<HealthCheckRecordResponse> getRecordsByNotice(Long checkNoticeId);
     List<HealthCheckRecordResponse> getRecordsByDate(LocalDate date);
-    List<HealthCheckRecordResponse> getRecordsByTitle(String title);
+
     HealthCheckRecordResponse updateRecord(Long recordId, HealthCheckRecordRequest request);
     void deleteRecord(Long recordId);
 } 

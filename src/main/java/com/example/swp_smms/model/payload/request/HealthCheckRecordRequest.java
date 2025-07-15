@@ -11,9 +11,6 @@ public class HealthCheckRecordRequest {
     @NotNull(message = "Health check notice ID is required")
     private Long healthCheckNoticeId;
 
-    @NotBlank(message = "Description is required")
-    private String description;
-
     @NotBlank(message = "Result is required")
     private String result;
 
