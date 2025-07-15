@@ -2,6 +2,7 @@ package com.example.swp_smms.controller;
 
 import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.VaccinationConfirmationRequest;
+import com.example.swp_smms.model.payload.request.VaccinationConfirmationStatusRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
 import com.example.swp_smms.model.payload.response.VaccinationConfirmationResponse;
 import com.example.swp_smms.service.VaccinationConfirmationService;
@@ -52,7 +53,7 @@ public class VaccinationConfirmationController {
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmations for notice fetched successfully", response);
     }
 
-    @GetMapping("/status/{status}")
+    @GetMapping("/all-by-status/{status}")
     public Object getConfirmationsByStatus(@PathVariable String status) {
         List<VaccinationConfirmationResponse> response = confirmationService.getConfirmationsByStatus(status);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmations by status fetched successfully", response);
@@ -63,6 +64,13 @@ public class VaccinationConfirmationController {
                                      @Valid @RequestBody VaccinationConfirmationRequest request) {
         VaccinationConfirmationResponse response = confirmationService.updateConfirmation(id, request);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmation updated successfully", response);
+    }
+
+    @PutMapping("/{id}/status")
+    public Object updateStatusOnly(@PathVariable Long id,
+                                   @Valid @RequestBody VaccinationConfirmationStatusRequest request) {
+        VaccinationConfirmationResponse response = confirmationService.updateStatusOnly(id, request);
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination status updated successfully", response);
     }
 
 

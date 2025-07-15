@@ -5,6 +5,7 @@ import com.example.swp_smms.model.entity.StudentParent;
 import com.example.swp_smms.model.entity.VaccinationConfirmation;
 import com.example.swp_smms.model.entity.VaccinationNotice;
 import com.example.swp_smms.model.payload.request.VaccinationConfirmationRequest;
+import com.example.swp_smms.model.payload.request.VaccinationConfirmationStatusRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
 import com.example.swp_smms.model.payload.response.VaccinationConfirmationResponse;
 import com.example.swp_smms.repository.AccountRepository;
@@ -187,6 +188,31 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
     public int confirmAllPendingByParent(UUID parentId) {
         return confirmationRepository.confirmAllPendingByParent(parentId,LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
+
+    @Override
+    public VaccinationConfirmationResponse updateStatusOnly(Long id, VaccinationConfirmationStatusRequest request) {
+        VaccinationConfirmation confirmation = confirmationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Vaccination confirmation not found with id: " + id));
+
+        String status = request.getStatus().toUpperCase();
+
+        // Optional: validate allowed status
+        List<String> allowedStatuses = List.of("CONFIRMED", "DECLINED", "COMPLETED", "ONGOING");
+        if (!allowedStatuses.contains(status)) {
+            throw new IllegalArgumentException("Invalid status: " + status);
+        }
+
+        confirmation.setStatus(status);
+
+        // Set confirmedAt if confirmed or declined
+        if (status.equals("CONFIRMED") || status.equals("DECLINED")) {
+            confirmation.setConfirmedAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        }
+
+        VaccinationConfirmation updated = confirmationRepository.save(confirmation);
+        return mapToResponse(updated);
+    }
+
 
     private VaccinationConfirmationResponse mapToResponse(VaccinationConfirmation confirmation) {
         return VaccinationConfirmationResponse.builder()
