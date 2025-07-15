@@ -4,6 +4,7 @@ import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.VaccinationConfirmationRequest;
 import com.example.swp_smms.model.payload.request.VaccinationConfirmationStatusRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
+import com.example.swp_smms.model.payload.response.NoticeStatisticalResponse;
 import com.example.swp_smms.model.payload.response.VaccinationConfirmationResponse;
 import com.example.swp_smms.service.VaccinationConfirmationService;
 import jakarta.validation.Valid;
@@ -103,6 +104,12 @@ public class VaccinationConfirmationController {
                 "Confirmed " + updatedCount + " pending confirmations for parent's children",
                 updatedCount
         );
+    }
+
+    @GetMapping("/statistics/{noticeId}")
+    public Object getNoticeStatistics(@PathVariable Long noticeId) {
+        NoticeStatisticalResponse response = confirmationService.getStatusCountsByNoticeId(noticeId);
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Notice statistics fetched successfully", response);
     }
 
 

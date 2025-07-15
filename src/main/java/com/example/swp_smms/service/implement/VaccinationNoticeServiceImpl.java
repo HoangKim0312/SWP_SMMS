@@ -2,6 +2,7 @@ package com.example.swp_smms.service.implement;
 
 import com.example.swp_smms.model.entity.*;
 import com.example.swp_smms.model.payload.request.VaccinationNoticeRequest;
+import com.example.swp_smms.model.payload.response.NoticeStatisticalResponse;
 import com.example.swp_smms.model.payload.response.VaccinationNoticeResponse;
 import com.example.swp_smms.repository.*;
 import com.example.swp_smms.service.VaccinationNoticeService;
@@ -59,7 +60,7 @@ public class VaccinationNoticeServiceImpl implements VaccinationNoticeService {
         List<Account> students = accountRepository.findAll().stream()
                 .filter(account -> account.getRole().getRoleId() == 1) // assuming roleId 1 = Student
                 .filter(account -> account.getClazz() != null && account.getClazz().getGrade() == request.getGrade())
-                .collect(Collectors.toList());
+                .toList();
 
         // Step 3: For each student, find their parent and insert VaccinationConfirmation
         for (Account student : students) {
@@ -135,6 +136,7 @@ public class VaccinationNoticeServiceImpl implements VaccinationNoticeService {
                 .vaccinationDate(notice.getVaccinationDate()) // renamed
                 .createdAt(notice.getCreatedAt())
                 .grade(notice.getGrade())
+                .batchId(notice.getVaccineBatch().getVaccineBatchId())
                 .build();
     }
 
@@ -170,5 +172,28 @@ public class VaccinationNoticeServiceImpl implements VaccinationNoticeService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<VaccinationNoticeResponse> filterNotices(Long vaccineId, Long vaccineBatchId, LocalDate vaccinationDate, boolean exact) {
+        return vaccinationNoticeRepository.findAll().stream()
+                .filter(notice -> {
+                    if (vaccineId != null && !vaccineId.equals(notice.getVaccineBatch().getVaccine().getVaccineId())) {
+                        return false;
+                    }
+                    if (vaccineBatchId != null && !vaccineBatchId.equals(notice.getVaccineBatch().getVaccineBatchId())) {
+                        return false;
+                    }
+                    if (vaccinationDate != null) {
+                        if (exact && !notice.getVaccinationDate().isEqual(vaccinationDate)) {
+                            return false;
+                        }
+                        if (!exact && notice.getVaccinationDate().isBefore(vaccinationDate)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
 
 } 

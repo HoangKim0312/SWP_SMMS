@@ -29,4 +29,9 @@ public interface VaccinationConfirmationRepository extends JpaRepository<Vaccina
                                   @Param("confirmedAt") String confirmedAt);
 
 
+    @Query("SELECT vc.status, COUNT(vc) FROM VaccinationConfirmation vc " +
+            "WHERE vc.vaccinationNotice.vaccineNoticeId = :noticeId " +
+            "GROUP BY vc.status")
+    List<Object[]> countByStatusForNotice(@Param("noticeId") Long noticeId);
+
 } 

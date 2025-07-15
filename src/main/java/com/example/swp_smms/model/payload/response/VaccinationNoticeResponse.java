@@ -14,5 +14,6 @@ public class VaccinationNoticeResponse {
     private String vaccineName;
     private LocalDate vaccinationDate; // renamed from "date"
     private LocalDate createdAt;
+    private Long batchId;
     private int grade;
 }

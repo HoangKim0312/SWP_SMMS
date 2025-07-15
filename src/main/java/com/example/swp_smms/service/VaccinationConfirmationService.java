@@ -3,6 +3,7 @@ package com.example.swp_smms.service;
 import com.example.swp_smms.model.payload.request.VaccinationConfirmationRequest;
 import com.example.swp_smms.model.payload.request.VaccinationConfirmationStatusRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
+import com.example.swp_smms.model.payload.response.NoticeStatisticalResponse;
 import com.example.swp_smms.model.payload.response.VaccinationConfirmationResponse;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public interface VaccinationConfirmationService {
     List<VaccinationConfirmationResponse> getConfirmationsByStatusAndParentId(String status, UUID parentId);
     List<VaccinationConfirmationResponse> confirmAllUpcomingNoticesForAllChildren(UUID parentId);
     int confirmAllPendingByParent(UUID parentId);
-    public VaccinationConfirmationResponse updateStatusOnly(Long id, VaccinationConfirmationStatusRequest request);
+    VaccinationConfirmationResponse updateStatusOnly(Long id, VaccinationConfirmationStatusRequest request);
+    NoticeStatisticalResponse getStatusCountsByNoticeId(Long noticeId);
 
 } 

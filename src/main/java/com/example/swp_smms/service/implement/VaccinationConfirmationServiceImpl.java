@@ -7,6 +7,7 @@ import com.example.swp_smms.model.entity.VaccinationNotice;
 import com.example.swp_smms.model.payload.request.VaccinationConfirmationRequest;
 import com.example.swp_smms.model.payload.request.VaccinationConfirmationStatusRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
+import com.example.swp_smms.model.payload.response.NoticeStatisticalResponse;
 import com.example.swp_smms.model.payload.response.VaccinationConfirmationResponse;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.StudentParentRepository;
@@ -212,6 +213,37 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
         VaccinationConfirmation updated = confirmationRepository.save(confirmation);
         return mapToResponse(updated);
     }
+
+    @Override
+    public NoticeStatisticalResponse getStatusCountsByNoticeId(Long noticeId) {
+        List<Object[]> statusCounts = confirmationRepository.countByStatusForNotice(noticeId);
+
+        long confirmed = 0, pending = 0, declined = 0, completed = 0, ongoing = 0;
+
+        for (Object[] row : statusCounts) {
+            String status = (String) row[0];
+            Long count = (Long) row[1];
+
+            switch (status.toUpperCase()) {
+                case "CONFIRMED" -> confirmed = count;
+                case "PENDING" -> pending = count;
+                case "DECLINED" -> declined = count;
+                case "COMPLETED" -> completed = count;
+                case "ONGOING" -> ongoing = count;
+            }
+        }
+
+        return NoticeStatisticalResponse.builder()
+                .noticeId(noticeId)
+                .confirmedCount(confirmed)
+                .pendingCount(pending)
+                .declinedCount(declined)
+                .completedCount(completed)
+                .ongoingCount(ongoing)
+                .build();
+    }
+
+
 
 
     private VaccinationConfirmationResponse mapToResponse(VaccinationConfirmation confirmation) {
