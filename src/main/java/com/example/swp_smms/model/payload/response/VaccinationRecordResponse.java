@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -20,5 +21,5 @@ public class VaccinationRecordResponse {
     private Long vaccineNoticeId;
     private String vaccineName;
     private String results;
-    private String date;
+    private LocalDate date;
 } 

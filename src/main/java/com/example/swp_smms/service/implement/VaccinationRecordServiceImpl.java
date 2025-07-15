@@ -3,12 +3,15 @@ package com.example.swp_smms.service.implement;
 import com.example.swp_smms.model.entity.Account;
 import com.example.swp_smms.model.entity.VaccinationNotice;
 import com.example.swp_smms.model.entity.VaccinationRecord;
+import com.example.swp_smms.model.entity.VaccineBatch;
 import com.example.swp_smms.model.payload.request.VaccinationRecordRequest;
 import com.example.swp_smms.model.payload.response.VaccinationRecordResponse;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.VaccinationNoticeRepository;
 import com.example.swp_smms.repository.VaccinationRecordRepository;
+import com.example.swp_smms.repository.VaccineBatchRepository;
 import com.example.swp_smms.service.VaccinationRecordService;
+import com.example.swp_smms.service.VaccineBatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +26,7 @@ public class VaccinationRecordServiceImpl implements VaccinationRecordService {
     private final VaccinationRecordRepository recordRepository;
     private final AccountRepository accountRepository;
     private final VaccinationNoticeRepository noticeRepository;
+    private final VaccineBatchRepository vaccineBatchRepository;
 
     @Override
     public VaccinationRecordResponse createRecord(VaccinationRecordRequest request, UUID nurseId) {
@@ -35,6 +39,20 @@ public class VaccinationRecordServiceImpl implements VaccinationRecordService {
         VaccinationNotice notice = noticeRepository.findById(request.getVaccineNoticeId())
                 .orElseThrow(() -> new RuntimeException("Vaccination notice not found with id: " + request.getVaccineNoticeId()));
 
+        // 🔽 Decrease batch quantity
+        VaccineBatch batch = notice.getVaccineBatch();
+        if (batch == null) {
+            throw new RuntimeException("No vaccine batch linked to this notice.");
+        }
+
+        if (batch.getQuantity() <= 0) {
+            throw new RuntimeException("Vaccine batch " + batch.getVaccineBatchId() + " has no remaining doses.");
+        }
+
+        batch.setQuantity(batch.getQuantity() - 1);
+        // Save the updated batch (you should @Autowired VaccineBatchRepository or create a VaccineBatchService)
+        vaccineBatchRepository.save(batch);
+
         VaccinationRecord record = new VaccinationRecord();
         record.setStudent(student);
         record.setNurse(nurse);
@@ -45,6 +63,7 @@ public class VaccinationRecordServiceImpl implements VaccinationRecordService {
         VaccinationRecord savedRecord = recordRepository.save(record);
         return mapToResponse(savedRecord);
     }
+
 
     @Override
     public VaccinationRecordResponse getRecordById(Long id) {

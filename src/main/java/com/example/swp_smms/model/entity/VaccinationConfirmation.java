@@ -21,10 +21,6 @@ public class VaccinationConfirmation {
     private VaccinationNotice vaccinationNotice;
 
     @ManyToOne
-    @JoinColumn(name = "vaccine_batch_id", referencedColumnName = "vaccine_batch_id")
-    private VaccineBatch vaccineBatch;
-
-    @ManyToOne
     @JoinColumn(name = "student_id", referencedColumnName = "account_id")
     private Account student;
 

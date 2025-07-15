@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,11 +25,10 @@ public class VaccineBatch {
     private int quantity;
     
     @Column(name = "stock_in_date")
-    private String stockInDate;
-    
-    @Column(name = "expiry_date")
-    private String expiryDate;
+    private LocalDate stockInDate;
 
+    @Column(name = "expiry_date")
+    private LocalDate expiryDate;
     
     @ManyToOne
     @JoinColumn(name = "vaccine_id", insertable = false, updatable = false)

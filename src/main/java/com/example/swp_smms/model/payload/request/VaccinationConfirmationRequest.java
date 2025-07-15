@@ -10,13 +10,10 @@ import java.util.UUID;
 public class VaccinationConfirmationRequest {
     @NotNull(message = "Vaccination notice ID is required")
     private Long vaccineNoticeId;
-    
+
     @NotNull(message = "Student ID is required")
     private UUID studentId;
-    
-    @NotNull(message = "Parent ID is required")
-    private UUID parentId;
-    
+
     @NotBlank(message = "Status is required")
     private String status; // "CONFIRMED", "DECLINED", "PENDING"
-} 
+}

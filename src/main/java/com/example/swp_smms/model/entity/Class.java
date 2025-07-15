@@ -21,7 +21,7 @@ public class Class {
     private String className;
 
     @Column(name = "grade")
-    private String grade;
+    private int grade;
 
     @Column(name = "description")
     private String description;

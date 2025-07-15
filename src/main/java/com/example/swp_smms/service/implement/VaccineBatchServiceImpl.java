@@ -39,11 +39,13 @@ public class VaccineBatchServiceImpl implements VaccineBatchService {
 
     @Override
     public List<VaccineBatchResponse> getAllBatchesByVaccineId(Long vaccineId) {
-        List<VaccineBatch> batches = vaccineBatchRepository.findByVaccineId(vaccineId);
+        List<VaccineBatch> batches = vaccineBatchRepository.findActiveByVaccineId(vaccineId);
         return batches.stream()
                 .map(batch -> modelMapper.map(batch, VaccineBatchResponse.class))
                 .collect(Collectors.toList());
     }
+
+
     @Override
     public void reduceBatchQuantity(Long batchId, int quantityToReduce) {
         VaccineBatch batch = vaccineBatchRepository.findById(batchId)
