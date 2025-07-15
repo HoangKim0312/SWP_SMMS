@@ -177,6 +177,10 @@ public class AccountServiceImpl implements AccountService {
         return response;
     }
 
+    @Override
+    public List<ChildData> getChildDataByClassId(Long classId) {
+        return accountRepository.findChildDataByClassId(classId);
+    }
 
 
 

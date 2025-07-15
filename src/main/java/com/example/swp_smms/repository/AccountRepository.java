@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,7 +31,12 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
 
     @Query("SELECT DISTINCT new com.example.swp_smms.model.payload.response.ChildData(a.accountId, a.fullName, a.clazz.classId) " +
             "FROM Account a JOIN a.medicationSents ms " +
-            "WHERE :today = ms.sentAt")
-    List<ChildData> findStudentsWithOngoingMedication(@Param("today") String today);
+            "WHERE ms.requestDate = :today AND ms.isActive = true")
+    List<ChildData> findStudentsWithOngoingMedication(@Param("today") LocalDate today);
+
+    @Query("SELECT new com.example.swp_smms.model.payload.response.ChildData(a.accountId, a.fullName, a.clazz.classId) " +
+            "FROM Account a " +
+            "WHERE a.role.roleId = 1 AND a.clazz.classId = :classId")
+    List<ChildData> findChildDataByClassId(@Param("classId") Long classId);
 
 }
