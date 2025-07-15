@@ -35,21 +35,19 @@ public class MedicationSentServiceImpl implements MedicationSentService {
 
     @Override
     public ListMedicationSentResponse getAllActiveMedicationSentsForStudent(UUID studentId) {
-        String today = LocalDate.now().toString();
-        // Fetch all medication sent records for the student
-        List<MedicationSent> sentList = medicationSentRepository.findActiveMedicationsByStudentIdAndDate(studentId,today);
+        LocalDate today = LocalDate.now();
+        List<MedicationSent> sentList = medicationSentRepository.findActiveMedicationsByStudentIdAndDate(studentId, today);
 
-        // Map each MedicationSent entity to MedicationSentResponse
         List<MedicationSentResponse> responseList = sentList.stream()
                 .map(entity -> {
                     MedicationSentResponse response = modelMapper.map(entity, MedicationSentResponse.class);
                     response.setStudentId(entity.getStudent().getAccountId());
                     response.setParentId(entity.getParent().getAccountId());
+                    response.setIsAccepted(entity.getIsAccepted());
                     return response;
                 })
                 .toList();
 
-        // Wrap in response object
         ListMedicationSentResponse result = new ListMedicationSentResponse();
         result.setMedicationSentList(responseList);
         return result;
@@ -57,11 +55,8 @@ public class MedicationSentServiceImpl implements MedicationSentService {
 
     @Override
     public ListMedicationSentResponse getAllMedicationSentsForStudent(UUID studentId) {
-        String today = LocalDate.now().toString();
-        // Fetch all medication sent records for the student
         List<MedicationSent> sentList = medicationSentRepository.findAllByStudentId(studentId);
 
-        // Map each MedicationSent entity to MedicationSentResponse
         List<MedicationSentResponse> responseList = sentList.stream()
                 .map(entity -> {
                     MedicationSentResponse response = modelMapper.map(entity, MedicationSentResponse.class);
@@ -71,7 +66,6 @@ public class MedicationSentServiceImpl implements MedicationSentService {
                 })
                 .toList();
 
-        // Wrap in response object
         ListMedicationSentResponse result = new ListMedicationSentResponse();
         result.setMedicationSentList(responseList);
         return result;
@@ -82,20 +76,17 @@ public class MedicationSentServiceImpl implements MedicationSentService {
         MedicationSent medicationSent = medicationSentRepository.findById(medicationSentId)
                 .orElseThrow(() -> new RuntimeException("MedicationSent not found with ID: " + medicationSentId));
 
-        // Validate student ownership
         if (!medicationSent.getStudent().getAccountId().equals(studentId)) {
             throw new RuntimeException("This MedicationSent does not belong to the specified student.");
         }
 
-        // Soft delete: mark as inactive
         medicationSent.setActive(false);
         medicationSentRepository.save(medicationSent);
     }
 
-
     @Override
     public ListMedicationSentResponse getAllActiveMedicationSentsForAllStudents() {
-        String today = LocalDate.now().toString();
+        LocalDate today = LocalDate.now();
         List<MedicationSent> sentList = medicationSentRepository.findAllActiveMedications(today);
 
         List<MedicationSentResponse> responseList = sentList.stream()
@@ -103,6 +94,7 @@ public class MedicationSentServiceImpl implements MedicationSentService {
                     MedicationSentResponse response = modelMapper.map(entity, MedicationSentResponse.class);
                     response.setStudentId(entity.getStudent().getAccountId());
                     response.setParentId(entity.getParent().getAccountId());
+                    response.setIsAccepted(entity.getIsAccepted());
                     return response;
                 })
                 .toList();
@@ -112,13 +104,10 @@ public class MedicationSentServiceImpl implements MedicationSentService {
         return result;
     }
 
-    // MedicationSentServiceImpl.java
-
     @Override
     public MedicationSentResponse createMedicationSent(UUID studentId, UUID parentId, MedicationSentRequest request) {
-        String sentAt = LocalDate.now().toString();
+        LocalDate sentAt = LocalDate.now();
 
-        // Validate parent-child relationship
         List<ChildData> children = accountRepository.findChildrenAccounts(parentId);
         boolean isChild = children.stream()
                 .anyMatch(child -> child.getChildId().equals(studentId));
@@ -126,13 +115,11 @@ public class MedicationSentServiceImpl implements MedicationSentService {
             throw new RuntimeException("This student does not belong to the specified parent.");
         }
 
-        // Fetch student and parent accounts
         Account student = accountRepository.findById(studentId)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
         Account parent = accountRepository.findById(parentId)
                 .orElseThrow(() -> new RuntimeException("Parent not found"));
 
-        // Build MedicationSent entity
         MedicationSent medSent = new MedicationSent();
         medSent.setStudent(student);
         medSent.setParent(parent);
@@ -161,7 +148,6 @@ public class MedicationSentServiceImpl implements MedicationSentService {
         medSent.setDosages(dosageList);
         MedicationSent saved = medicationSentRepository.save(medSent);
 
-        // ✅ Manually map to response DTO
         MedicationSentResponse response = new MedicationSentResponse();
         response.setMedSentId(saved.getMedSentId());
         response.setStudentId(saved.getStudent().getAccountId());
@@ -228,7 +214,6 @@ public class MedicationSentServiceImpl implements MedicationSentService {
         MedicationSent entity = medicationSentRepository.findById(medicationSentId)
                 .orElseThrow(() -> new RuntimeException("MedicationSent not found"));
 
-        // Ensure it belongs to the student and is active
         if (!entity.getStudent().getAccountId().equals(studentId)) {
             throw new RuntimeException("This MedicationSent does not belong to the specified student.");
         }
@@ -260,7 +245,57 @@ public class MedicationSentServiceImpl implements MedicationSentService {
         }).toList();
 
         response.setDosages(dosageResponses);
+        response.setIsAccepted(entity.getIsAccepted());
         return response;
+    }
+
+    @Override
+    public void updateMedicationSentAcceptance(Long medSentId, Boolean isAccepted) {
+        MedicationSent medicationSent = medicationSentRepository.findById(medSentId)
+                .orElseThrow(() -> new RuntimeException("MedicationSent not found with ID: " + medSentId));
+
+        if (!medicationSent.isActive()) {
+            throw new RuntimeException("Cannot modify an inactive MedicationSent.");
+        }
+
+        medicationSent.setIsAccepted(isAccepted);
+        medicationSentRepository.save(medicationSent);
+    }
+
+    @Override
+    public ListMedicationSentResponse getAcceptedMedicationSents(UUID studentId, LocalDate date) {
+        List<MedicationSent> sentList = medicationSentRepository.findAcceptedWithOptionalFilters(studentId, date);
+
+        List<MedicationSentResponse> responseList = sentList.stream()
+                .map(entity -> {
+                    MedicationSentResponse response = modelMapper.map(entity, MedicationSentResponse.class);
+                    response.setStudentId(entity.getStudent().getAccountId());
+                    response.setParentId(entity.getParent().getAccountId());
+                    response.setIsAccepted(entity.getIsAccepted());
+                    return response;
+                }).toList();
+
+        ListMedicationSentResponse result = new ListMedicationSentResponse();
+        result.setMedicationSentList(responseList);
+        return result;
+    }
+
+    @Override
+    public ListMedicationSentResponse getDeclinedMedicationSents(UUID studentId, LocalDate requestDate) {
+        List<MedicationSent> sentList = medicationSentRepository.findDeclinedWithOptionalFilters(studentId, requestDate);
+
+        List<MedicationSentResponse> responseList = sentList.stream()
+                .map(entity -> {
+                    MedicationSentResponse response = modelMapper.map(entity, MedicationSentResponse.class);
+                    response.setStudentId(entity.getStudent().getAccountId());
+                    response.setParentId(entity.getParent().getAccountId());
+                    response.setIsAccepted(entity.getIsAccepted());
+                    return response;
+                }).toList();
+
+        ListMedicationSentResponse result = new ListMedicationSentResponse();
+        result.setMedicationSentList(responseList);
+        return result;
     }
 
 

@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/classes")
 @RequiredArgsConstructor
@@ -20,4 +22,12 @@ public class ClassController {
         ClassResponse created = classService.createClass(request);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
+    @GetMapping("/by-grade")
+    public ResponseEntity<List<ClassResponse>> getClassesByGrade(@RequestParam String grade) {
+        List<ClassResponse> responses = classService.getClassesByGradeInCurrentYear(grade);
+        return ResponseEntity.ok(responses);
+    }
+
+
+
 }

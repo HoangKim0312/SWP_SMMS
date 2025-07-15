@@ -104,4 +104,11 @@ public class AccountController {
         }
     }
 
+    @GetMapping("/students/child-data/by-class")
+    public ResponseEntity<List<ChildData>> getChildDataByClass(@RequestParam Long classId) {
+        List<ChildData> students = accountService.getChildDataByClassId(classId);
+        return ResponseEntity.ok(students);
+    }
+
+
 }

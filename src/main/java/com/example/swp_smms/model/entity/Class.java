@@ -19,7 +19,10 @@ public class Class {
     
     @Column(name = "class_name")
     private String className;
-    
+
+    @Column(name = "grade")
+    private String grade;
+
     @Column(name = "description")
     private String description;
 

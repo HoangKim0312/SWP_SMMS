@@ -2,6 +2,7 @@ package com.example.swp_smms.model.payload.response;
 
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -10,7 +11,8 @@ public class MedicationSentResponse {
     private Long medSentId;
     private UUID studentId;
     private UUID parentId;
-    private String requestDate;     // e.g., "2025-07-08"
-    private String sentAt;          // submission timestamp (today)
+    private LocalDate requestDate;      // e.g., "2025-07-08"
+    private LocalDate sentAt;           // submission date (today)
+    private Boolean isAccepted;         // true, false, or null
     private List<DosageResponse> dosages;
 }

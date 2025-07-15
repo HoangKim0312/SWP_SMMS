@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class ClassServiceImpl implements ClassService {
@@ -26,4 +29,15 @@ public class ClassServiceImpl implements ClassService {
         Class saved = classRepository.save(clazz);
         return modelMapper.map(saved, ClassResponse.class);
     }
+
+    @Override
+    public List<ClassResponse> getClassesByGradeInCurrentYear(String grade) {
+        int currentYear = LocalDate.now().getYear();
+        List<Class> classes = classRepository.findByGradeAndCurrentYear(grade, currentYear);
+        return classes.stream()
+                .map(clazz -> modelMapper.map(clazz, ClassResponse.class))
+                .toList();
+    }
+
+
 }
