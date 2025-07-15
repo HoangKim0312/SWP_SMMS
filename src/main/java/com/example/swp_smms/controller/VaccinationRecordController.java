@@ -75,4 +75,4 @@ public class VaccinationRecordController {
         recordService.deleteRecord(id);
         return ResponseBuilder.responseBuilder(HttpStatus.OK, "Vaccination record deleted successfully");
     }
-} 
+}

@@ -18,12 +18,16 @@ public class VaccineBatch {
     
     @Column(name = "vaccine_id")
     private Long vaccineId;
+
+    @Column(name = "quantity")
+    private int quantity;
     
     @Column(name = "stock_in_date")
     private String stockInDate;
     
     @Column(name = "expiry_date")
     private String expiryDate;
+
     
     @ManyToOne
     @JoinColumn(name = "vaccine_id", insertable = false, updatable = false)
