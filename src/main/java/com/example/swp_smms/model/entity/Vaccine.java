@@ -27,7 +27,4 @@ public class Vaccine {
     
     @Column(name = "release_date")
     private String releaseDate;
-    
-    @Column(name = "confirmed_at")
-    private String confirmedAt;
 } 

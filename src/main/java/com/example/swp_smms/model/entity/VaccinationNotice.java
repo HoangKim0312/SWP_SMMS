@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,13 +23,21 @@ public class VaccinationNotice {
     
     @Column(name = "description")
     private String description;
-    
+
+    //for students in selected grade
+    @Column(name = "grade")
+    private int grade;
+
     @Column(name = "vaccine_name")
     private String vaccineName;
-    
-    @Column(name = "date")
-    private String date;
+
+    @ManyToOne
+    @JoinColumn(name = "vaccine_batch_id")
+    private VaccineBatch vaccineBatch;
+
+    @Column(name = "vaccination_date")
+    private LocalDate vaccinationDate;
     
     @Column(name = "created_at")
-    private String createdAt;
+    private LocalDate createdAt;
 } 

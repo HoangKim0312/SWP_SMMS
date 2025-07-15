@@ -8,6 +8,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+
 
 import java.util.List;
 import java.util.UUID;
@@ -20,10 +22,14 @@ public class VaccinationConfirmationController {
     private final VaccinationConfirmationService confirmationService;
 
     @PostMapping
-    public Object createConfirmation(@Valid @RequestBody VaccinationConfirmationRequest request) {
-        VaccinationConfirmationResponse response = confirmationService.createConfirmation(request);
+    public Object createConfirmation(
+            @RequestParam UUID parentId,
+            @Valid @RequestBody VaccinationConfirmationRequest request) {
+
+        VaccinationConfirmationResponse response = confirmationService.createConfirmation(request, parentId);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmation created successfully", response);
     }
+
 
     @GetMapping("/{id}")
     public Object getConfirmationById(@PathVariable Long id) {
@@ -62,10 +68,13 @@ public class VaccinationConfirmationController {
     }
 
     @PutMapping("/{id}")
-    public Object updateConfirmation(@PathVariable Long id, @Valid @RequestBody VaccinationConfirmationRequest request) {
-        VaccinationConfirmationResponse response = confirmationService.updateConfirmation(id, request);
+    public Object updateConfirmation(@PathVariable Long id,
+                                     @RequestParam UUID parentId,
+                                     @Valid @RequestBody VaccinationConfirmationRequest request) {
+        VaccinationConfirmationResponse response = confirmationService.updateConfirmation(id, request, parentId);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmation updated successfully", response);
     }
+
 
     @DeleteMapping("/{id}")
     public Object deleteConfirmation(@PathVariable Long id) {

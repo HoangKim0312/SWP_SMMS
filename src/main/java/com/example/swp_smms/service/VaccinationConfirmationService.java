@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.UUID;
 
 public interface VaccinationConfirmationService {
-    VaccinationConfirmationResponse createConfirmation(VaccinationConfirmationRequest request);
+    VaccinationConfirmationResponse createConfirmation(VaccinationConfirmationRequest request, UUID parentId);
     VaccinationConfirmationResponse getConfirmationById(Long id);
     List<VaccinationConfirmationResponse> getAllConfirmations();
     List<VaccinationConfirmationResponse> getConfirmationsByStudent(UUID studentId);
     List<VaccinationConfirmationResponse> getConfirmationsByParent(UUID parentId);
     List<VaccinationConfirmationResponse> getConfirmationsByNotice(Long vaccineNoticeId);
     List<VaccinationConfirmationResponse> getConfirmationsByStatus(String status);
-    VaccinationConfirmationResponse updateConfirmation(Long id, VaccinationConfirmationRequest request);
+    VaccinationConfirmationResponse updateConfirmation(Long id, VaccinationConfirmationRequest request, UUID parentId);
     void deleteConfirmation(Long id);
 } 
