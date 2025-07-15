@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/vaccination-notices")
@@ -69,5 +70,13 @@ public class VaccinationNoticeController {
         List<VaccinationNoticeResponse> response = noticeService.getActiveNotices();
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Active (upcoming) vaccination notices fetched successfully", response);
     }
+
+    @GetMapping("/active-by-parent")
+    public Object getActiveNoticesByParent(@RequestParam UUID parentId) {
+        List<VaccinationNoticeResponse> response = noticeService.getActiveNoticesByParent(parentId);
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Active notices for parent's children fetched", response);
+    }
+
+
 
 } 
