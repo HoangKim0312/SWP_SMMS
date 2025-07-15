@@ -27,15 +27,27 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
     private final VaccinationNoticeRepository noticeRepository;
 
     @Override
-    public VaccinationConfirmationResponse createConfirmation(VaccinationConfirmationRequest request) {
+    public VaccinationConfirmationResponse createConfirmation(VaccinationConfirmationRequest request, UUID parentId) {
         Account student = accountRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found with id: " + request.getStudentId()));
 
-        Account parent = accountRepository.findById(request.getParentId())
-                .orElseThrow(() -> new RuntimeException("Parent not found with id: " + request.getParentId()));
+        Account parent = accountRepository.findById(parentId)
+                .orElseThrow(() -> new RuntimeException("Parent not found with id: " + parentId));
 
         VaccinationNotice notice = noticeRepository.findById(request.getVaccineNoticeId())
                 .orElseThrow(() -> new RuntimeException("Vaccination notice not found with id: " + request.getVaccineNoticeId()));
+
+        if (student.getClazz().getGrade() != notice.getGrade()) {
+            throw new RuntimeException("Student grade does not match notice grade.");
+        }
+
+        boolean exists = confirmationRepository
+                .findByStudent_AccountId(request.getStudentId()).stream()
+                .anyMatch(c -> c.getVaccinationNotice().getVaccineNoticeId().equals(request.getVaccineNoticeId()));
+
+        if (exists) {
+            throw new RuntimeException("This student has already responded to the vaccination notice.");
+        }
 
         VaccinationConfirmation confirmation = new VaccinationConfirmation();
         confirmation.setVaccinationNotice(notice);
@@ -47,6 +59,7 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
         VaccinationConfirmation savedConfirmation = confirmationRepository.save(confirmation);
         return mapToResponse(savedConfirmation);
     }
+
 
     @Override
     public VaccinationConfirmationResponse getConfirmationById(Long id) {
@@ -91,15 +104,16 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
     }
 
     @Override
-    public VaccinationConfirmationResponse updateConfirmation(Long id, VaccinationConfirmationRequest request) {
+    public VaccinationConfirmationResponse updateConfirmation(Long id, VaccinationConfirmationRequest request,UUID parentId) {
         VaccinationConfirmation confirmation = confirmationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Vaccination confirmation not found with id: " + id));
 
         Account student = accountRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found with id: " + request.getStudentId()));
 
-        Account parent = accountRepository.findById(request.getParentId())
-                .orElseThrow(() -> new RuntimeException("Parent not found with id: " + request.getParentId()));
+        Account parent = accountRepository.findById(parentId)
+                .orElseThrow(() -> new RuntimeException("Parent not found with id: " + parentId));
+
 
         VaccinationNotice notice = noticeRepository.findById(request.getVaccineNoticeId())
                 .orElseThrow(() -> new RuntimeException("Vaccination notice not found with id: " + request.getVaccineNoticeId()));

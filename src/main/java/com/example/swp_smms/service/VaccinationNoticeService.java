@@ -6,10 +6,13 @@ import com.example.swp_smms.model.payload.response.VaccinationNoticeResponse;
 import java.util.List;
 
 public interface VaccinationNoticeService {
-    VaccinationNoticeResponse createNotice(VaccinationNoticeRequest request);
+    VaccinationNoticeResponse createNotice(VaccinationNoticeRequest request, Long vaccineBatchId);
     VaccinationNoticeResponse getNoticeById(Long id);
     List<VaccinationNoticeResponse> getAllNotices();
     List<VaccinationNoticeResponse> searchNoticesByVaccineName(String vaccineName);
     VaccinationNoticeResponse updateNotice(Long id, VaccinationNoticeRequest request);
     void deleteNotice(Long id);
+    List<VaccinationNoticeResponse> getNoticesForToday();
+    List<VaccinationNoticeResponse> getActiveNotices();
+
 } 

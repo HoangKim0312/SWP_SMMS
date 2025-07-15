@@ -7,6 +7,7 @@ import com.example.swp_smms.service.VaccinationNoticeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,9 +20,12 @@ public class VaccinationNoticeController {
     private final VaccinationNoticeService noticeService;
 
     @PostMapping
-    public Object createNotice(@Valid @RequestBody VaccinationNoticeRequest request) {
-        VaccinationNoticeResponse response = noticeService.createNotice(request);
-        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination notice created successfully", response);
+    public ResponseEntity<VaccinationNoticeResponse> createNotice(
+            @RequestBody @Valid VaccinationNoticeRequest request,
+            @RequestParam Long vaccineBatchId
+    ) {
+        VaccinationNoticeResponse created = noticeService.createNotice(request, vaccineBatchId);
+        return ResponseEntity.ok(created);
     }
 
     @GetMapping("/{id}")
@@ -53,4 +57,17 @@ public class VaccinationNoticeController {
         noticeService.deleteNotice(id);
         return ResponseBuilder.responseBuilder(HttpStatus.OK, "Vaccination notice deleted successfully");
     }
+
+    @GetMapping("/today")
+    public Object getNoticesForToday() {
+        List<VaccinationNoticeResponse> response = noticeService.getNoticesForToday();
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Today's vaccination notices fetched successfully", response);
+    }
+
+    @GetMapping("/active")
+    public Object getActiveNotices() {
+        List<VaccinationNoticeResponse> response = noticeService.getActiveNotices();
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Active (upcoming) vaccination notices fetched successfully", response);
+    }
+
 } 
