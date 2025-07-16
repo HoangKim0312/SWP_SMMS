@@ -31,9 +31,19 @@ public class HealthCheckNoticeServiceImpl implements HealthCheckNoticeService {
         
         // Set current date and time
         LocalDateTime currentDateTime = LocalDateTime.now();
+
         notice.setCreatedAt(currentDateTime);
-        notice.setDate(currentDateTime.toLocalDate());
-        
+        if (request.getDate() != null && !request.getDate().isEmpty()) {
+            try {
+                notice.setDate(LocalDate.parse(request.getDate()));
+            } catch (Exception e) {
+                throw new RuntimeException("Invalid date format: " + request.getDate());
+            }
+        }
+        //Set tittle & desciption
+        notice.setTitle(request.getTitle());
+
+        notice.setDescription(request.getDescription());
         // Save to DB
         HealthCheckNotice savedNotice = healthCheckNoticeRepository.save(notice);
         
@@ -99,7 +109,13 @@ public class HealthCheckNoticeServiceImpl implements HealthCheckNoticeService {
         // Update fields from request
         notice.setTitle(request.getTitle());
         notice.setDescription(request.getDescription());
-        
+        if (request.getDate() != null && !request.getDate().isEmpty()) {
+            try {
+                notice.setDate(LocalDate.parse(request.getDate()));
+            } catch (Exception e) {
+                throw new RuntimeException("Invalid date format: " + request.getDate());
+            }
+        }
         HealthCheckNotice updatedNotice = healthCheckNoticeRepository.save(notice);
         
         HealthCheckNoticeResponse response = modelMapper.map(updatedNotice, HealthCheckNoticeResponse.class);

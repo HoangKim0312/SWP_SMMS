@@ -65,11 +65,7 @@ public class HealthCheckRecordController {
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Health check records by date fetched successfully", response);
     }
 
-    @GetMapping("/getByTitle/{title}")
-    public Object getRecordsByTitle(@PathVariable String title) {
-        List<HealthCheckRecordResponse> response = recordService.getRecordsByTitle(title);
-        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Health check records by title fetched successfully", response);
-    }
+
 
     @PutMapping("/update/{id}")
     public Object updateRecord(@PathVariable Long id, @Valid @RequestBody HealthCheckRecordRequest request) {
