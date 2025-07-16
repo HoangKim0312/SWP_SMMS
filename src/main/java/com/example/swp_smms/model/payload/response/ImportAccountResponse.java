@@ -23,5 +23,11 @@ public class ImportAccountResponse {
         private UUID accountId;
         private boolean success;
         private String errorMessage;
+        private String linkingMessage;
+        
+        // Add setter for linkingMessage since we need to update it after creation
+        public void setLinkingMessage(String linkingMessage) {
+            this.linkingMessage = linkingMessage;
+        }
     }
 } 
