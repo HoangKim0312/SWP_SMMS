@@ -7,4 +7,5 @@ public class ClassRequest {
     private String className;
     private String description;
     private int schoolYear;
+    private int grade;
 }

@@ -14,6 +14,9 @@ public class VaccinationConfirmationRequest {
     @NotNull(message = "Student ID is required")
     private UUID studentId;
 
+    @NotNull(message = "Parent ID is required")
+    private UUID parentId;
+
     @NotBlank(message = "Status is required")
     private String status; // "CONFIRMED", "DECLINED", "PENDING"
 }

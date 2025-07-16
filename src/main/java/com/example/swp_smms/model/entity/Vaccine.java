@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,5 +28,5 @@ public class Vaccine {
     private String version;
     
     @Column(name = "release_date")
-    private String releaseDate;
+    private LocalDate releaseDate;
 } 
