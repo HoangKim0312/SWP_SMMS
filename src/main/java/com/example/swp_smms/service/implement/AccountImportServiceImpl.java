@@ -139,12 +139,14 @@ public class AccountImportServiceImpl implements AccountImportService {
             throw new IllegalArgumentException("Excel file must have at least 5 columns: Email, First Name, Last Name, Phone, Role Name");
         }
 
-        // Check if we have the optional linking columns (F, G, H, and I)
+        // Check if we have the optional linking columns (F, G, H, I, J, and K)
         boolean hasLinkingColumns = headerRow.getLastCellNum() >= 7;
         boolean hasPairMode = headerRow.getLastCellNum() >= 8;
         boolean hasClassName = headerRow.getLastCellNum() >= 9;
-        logger.info("Excel structure validated. Columns: {}, Has linking columns: {}, Has PAIR mode: {}, Has class name: {}", 
-            headerRow.getLastCellNum(), hasLinkingColumns, hasPairMode, hasClassName);
+        boolean hasDob = headerRow.getLastCellNum() >= 10;
+        boolean hasGender = headerRow.getLastCellNum() >= 11;
+        logger.info("Excel structure validated. Columns: {}, Has linking columns: {}, Has PAIR mode: {}, Has class name: {}, Has DOB: {}, Has gender: {}", 
+            headerRow.getLastCellNum(), hasLinkingColumns, hasPairMode, hasClassName, hasDob, hasGender);
 
 
     }
@@ -187,6 +189,8 @@ public class AccountImportServiceImpl implements AccountImportService {
             String studentEmail = getCellValueAsString(row.getCell(6)); // Column G - Student Email
             String linkType = getCellValueAsString(row.getCell(7)); // Column H - Link Type
             String className = getCellValueAsString(row.getCell(8)); // Column I - Class Name
+            String dob = getCellValueAsString(row.getCell(9)); // Column J - Date of Birth
+            String gender = getCellValueAsString(row.getCell(10)); // Column K - Gender
 
             // Validate required fields
             if (email == null || firstName == null || lastName == null || roleName == null) {
@@ -195,6 +199,13 @@ public class AccountImportServiceImpl implements AccountImportService {
                     .firstName(firstName)
                     .lastName(lastName)
                     .phone(phone)
+                    .roleName(roleName)
+                    .parentEmail(parentEmail)
+                    .studentEmail(studentEmail)
+                    .linkType(linkType)
+                    .className(className)
+                    .dob(normalizeDateFormat(dob))
+                    .gender(gender)
                     .success(false)
                     .errorMessage("Missing required fields (email, firstName, lastName, roleName)")
                     .linkingMessage(null)
@@ -208,6 +219,13 @@ public class AccountImportServiceImpl implements AccountImportService {
                     .firstName(firstName)
                     .lastName(lastName)
                     .phone(phone)
+                    .roleName(roleName)
+                    .parentEmail(parentEmail)
+                    .studentEmail(studentEmail)
+                    .linkType(linkType)
+                    .className(className)
+                    .dob(normalizeDateFormat(dob))
+                    .gender(gender)
                     .success(false)
                     .errorMessage("Email already exists")
                     .linkingMessage(null)
@@ -229,6 +247,13 @@ public class AccountImportServiceImpl implements AccountImportService {
                     .firstName(firstName)
                     .lastName(lastName)
                     .phone(phone)
+                    .roleName(roleName)
+                    .parentEmail(parentEmail)
+                    .studentEmail(studentEmail)
+                    .linkType(linkType)
+                    .className(className)
+                    .dob(normalizeDateFormat(dob))
+                    .gender(gender)
                     .success(false)
                     .errorMessage("Invalid role: " + roleName + ". Available roles: " + 
                         roleRepository.findAll().stream().map(Role::getRoleName).collect(Collectors.joining(", ")))
@@ -248,6 +273,24 @@ public class AccountImportServiceImpl implements AccountImportService {
             account.setPhone(phone);
             account.setRole(role);
             
+            // Handle gender
+            if (gender != null && !gender.trim().isEmpty()) {
+                account.setGender(gender.trim());
+            }
+            
+            // Handle date of birth
+            logger.info("Processing DOB for {}: '{}'", email, dob);
+            if (dob != null && !dob.trim().isEmpty()) {
+                String normalizedDob = normalizeDateFormat(dob);
+                logger.info("Normalized DOB for {}: '{}' -> '{}'", email, dob, normalizedDob);
+                if (normalizedDob != null) {
+                    account.setDob(normalizedDob);
+                    logger.info("Set DOB for {}: '{}'", email, normalizedDob);
+                }
+            } else {
+                logger.info("DOB is null or empty for {}", email);
+            }
+            
             // Handle class assignment for students
             if (RoleEnum.STUDENT.getRoleName().equalsIgnoreCase(roleName) && className != null && !className.trim().isEmpty()) {
                 Class clazz = findOrCreateClass(className);
@@ -264,6 +307,13 @@ public class AccountImportServiceImpl implements AccountImportService {
                 .firstName(firstName)
                 .lastName(lastName)
                 .phone(phone)
+                .roleName(roleName)
+                .parentEmail(parentEmail)
+                .studentEmail(studentEmail)
+                .linkType(linkType)
+                .className(className)
+                .dob(normalizeDateFormat(dob))
+                .gender(gender)
                 .accountId(account.getAccountId())
                 .success(true)
                 .linkingMessage("Account created successfully. Linking will be processed in second phase.")
@@ -275,6 +325,13 @@ public class AccountImportServiceImpl implements AccountImportService {
                 .firstName(getCellValueAsString(row.getCell(1)))
                 .lastName(getCellValueAsString(row.getCell(2)))
                 .phone(getCellValueAsString(row.getCell(3)))
+                .roleName(getCellValueAsString(row.getCell(4)))
+                .parentEmail(getCellValueAsString(row.getCell(5)))
+                .studentEmail(getCellValueAsString(row.getCell(6)))
+                .linkType(getCellValueAsString(row.getCell(7)))
+                .className(getCellValueAsString(row.getCell(8)))
+                .dob(normalizeDateFormat(getCellValueAsString(row.getCell(9))))
+                .gender(getCellValueAsString(row.getCell(10)))
                 .success(false)
                 .errorMessage("Error processing row: " + e.getMessage())
                 .linkingMessage(null)
@@ -288,7 +345,16 @@ public class AccountImportServiceImpl implements AccountImportService {
             case STRING:
                 return cell.getStringCellValue();
             case NUMERIC:
-                return String.valueOf((long) cell.getNumericCellValue());
+                // Check if it's a date
+                if (org.apache.poi.ss.usermodel.DateUtil.isCellDateFormatted(cell)) {
+                    java.util.Date date = cell.getDateCellValue();
+                    java.time.LocalDate localDate = date.toInstant()
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDate();
+                    return localDate.format(java.time.format.DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+                } else {
+                    return String.valueOf((long) cell.getNumericCellValue());
+                }
             default:
                 return null;
         }
@@ -474,5 +540,37 @@ private int extractGradeFromClassName(String className) {
 private int getCurrentSchoolYear() {
     // Simple implementation - you might want to make this configurable
     return java.time.Year.now().getValue();
+}
+
+/**
+ * Validates and normalizes date string to YYYY-MM-DD format
+ */
+private String normalizeDateFormat(String dateStr) {
+    if (dateStr == null || dateStr.trim().isEmpty()) {
+        return null;
+    }
+    
+    try {
+        // Try YYYY-MM-DD format first
+        java.time.LocalDate.parse(dateStr);
+        return dateStr;
+    } catch (Exception e1) {
+        try {
+            // Try MM/DD/YYYY format (Excel default)
+            java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("M/d/yyyy");
+            java.time.LocalDate date = java.time.LocalDate.parse(dateStr, formatter);
+            return date.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        } catch (Exception e2) {
+            try {
+                // Try MM/DD/YY format
+                java.time.format.DateTimeFormatter formatter = java.time.format.DateTimeFormatter.ofPattern("M/d/yy");
+                java.time.LocalDate date = java.time.LocalDate.parse(dateStr, formatter);
+                return date.format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+            } catch (Exception e3) {
+                logger.warn("Invalid date format: {}. Expected YYYY-MM-DD or MM/DD/YYYY format.", dateStr);
+                return null;
+            }
+        }
+    }
 }
 } 

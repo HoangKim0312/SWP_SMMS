@@ -20,6 +20,13 @@ public class ImportAccountResponse {
         private String firstName;
         private String lastName;
         private String phone;
+        private String roleName;
+        private String parentEmail;
+        private String studentEmail;
+        private String linkType;
+        private String className;
+        private String dob;
+        private String gender;
         private UUID accountId;
         private boolean success;
         private String errorMessage;
