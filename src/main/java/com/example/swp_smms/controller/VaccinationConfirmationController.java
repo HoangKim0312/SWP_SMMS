@@ -2,6 +2,9 @@ package com.example.swp_smms.controller;
 
 import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.VaccinationConfirmationRequest;
+import com.example.swp_smms.model.payload.request.VaccinationConfirmationStatusRequest;
+import com.example.swp_smms.model.payload.response.AccountResponse;
+import com.example.swp_smms.model.payload.response.NoticeStatisticalResponse;
 import com.example.swp_smms.model.payload.response.VaccinationConfirmationResponse;
 import com.example.swp_smms.service.VaccinationConfirmationService;
 import jakarta.validation.Valid;
@@ -20,16 +23,6 @@ import java.util.UUID;
 public class VaccinationConfirmationController {
 
     private final VaccinationConfirmationService confirmationService;
-
-    @PostMapping
-    public Object createConfirmation(
-            @RequestParam UUID parentId,
-            @Valid @RequestBody VaccinationConfirmationRequest request) {
-
-        VaccinationConfirmationResponse response = confirmationService.createConfirmation(request, parentId);
-        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmation created successfully", response);
-    }
-
 
     @GetMapping("/{id}")
     public Object getConfirmationById(@PathVariable Long id) {
@@ -61,7 +54,7 @@ public class VaccinationConfirmationController {
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmations for notice fetched successfully", response);
     }
 
-    @GetMapping("/status/{status}")
+    @GetMapping("/all-by-status/{status}")
     public Object getConfirmationsByStatus(@PathVariable String status) {
         List<VaccinationConfirmationResponse> response = confirmationService.getConfirmationsByStatus(status);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmations by status fetched successfully", response);
@@ -69,10 +62,16 @@ public class VaccinationConfirmationController {
 
     @PutMapping("/{id}")
     public Object updateConfirmation(@PathVariable Long id,
-                                     @RequestParam UUID parentId,
                                      @Valid @RequestBody VaccinationConfirmationRequest request) {
-        VaccinationConfirmationResponse response = confirmationService.updateConfirmation(id, request, parentId);
+        VaccinationConfirmationResponse response = confirmationService.updateConfirmation(id, request);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmation updated successfully", response);
+    }
+
+    @PutMapping("/{id}/status")
+    public Object updateStatusOnly(@PathVariable Long id,
+                                   @Valid @RequestBody VaccinationConfirmationStatusRequest request) {
+        VaccinationConfirmationResponse response = confirmationService.updateStatusOnly(id, request);
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination status updated successfully", response);
     }
 
 
@@ -81,4 +80,38 @@ public class VaccinationConfirmationController {
         confirmationService.deleteConfirmation(id);
         return ResponseBuilder.responseBuilder(HttpStatus.OK, "Vaccination confirmation deleted successfully");
     }
+
+    @GetMapping("/notice/{vaccineNoticeId}/students/confirmed")
+    public Object getConfirmedStudentsByNotice(@PathVariable Long vaccineNoticeId) {
+        List<AccountResponse> response = confirmationService.getConfirmedStudentsByNotice(vaccineNoticeId);
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Confirmed students fetched successfully", response);
+    }
+
+    @GetMapping("/status")
+    public Object getConfirmationsByStatusAndParent(
+            @RequestParam String status,
+            @RequestParam UUID parentId
+    ) {
+        List<VaccinationConfirmationResponse> response = confirmationService.getConfirmationsByStatusAndParentId(status, parentId);
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Confirmations fetched successfully", response);
+    }
+
+    @PutMapping("/confirm-all")
+    public Object confirmAllPendingByParent(@RequestParam UUID parentId) {
+        int updatedCount = confirmationService.confirmAllPendingByParent(parentId);
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "Confirmed " + updatedCount + " pending confirmations for parent's children",
+                updatedCount
+        );
+    }
+
+    @GetMapping("/statistics/{noticeId}")
+    public Object getNoticeStatistics(@PathVariable Long noticeId) {
+        NoticeStatisticalResponse response = confirmationService.getStatusCountsByNoticeId(noticeId);
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Notice statistics fetched successfully", response);
+    }
+
+
+
 } 

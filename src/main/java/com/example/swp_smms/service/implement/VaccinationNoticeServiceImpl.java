@@ -1,17 +1,18 @@
 package com.example.swp_smms.service.implement;
 
-import com.example.swp_smms.model.entity.VaccinationNotice;
-import com.example.swp_smms.model.entity.VaccineBatch;
+import com.example.swp_smms.model.entity.*;
 import com.example.swp_smms.model.payload.request.VaccinationNoticeRequest;
+import com.example.swp_smms.model.payload.response.NoticeStatisticalResponse;
 import com.example.swp_smms.model.payload.response.VaccinationNoticeResponse;
-import com.example.swp_smms.repository.VaccinationNoticeRepository;
-import com.example.swp_smms.repository.VaccineBatchRepository;
+import com.example.swp_smms.repository.*;
 import com.example.swp_smms.service.VaccinationNoticeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,8 +21,13 @@ public class VaccinationNoticeServiceImpl implements VaccinationNoticeService {
 
     private final VaccinationNoticeRepository vaccinationNoticeRepository;
     private final VaccineBatchRepository vaccineBatchRepository;
+    private final StudentParentRepository studentParentRepository;
+    private final AccountRepository accountRepository;
+    private final VaccinationConfirmationRepository vaccinationConfirmationRepository;
+
 
     @Override
+    @Transactional
     public VaccinationNoticeResponse createNotice(VaccinationNoticeRequest request, Long vaccineBatchId) {
         VaccineBatch batch = vaccineBatchRepository.findById(vaccineBatchId)
                 .orElseThrow(() -> new RuntimeException("Vaccine batch not found with ID: " + vaccineBatchId));
@@ -38,17 +44,40 @@ public class VaccinationNoticeServiceImpl implements VaccinationNoticeService {
             throw new RuntimeException("Vaccination date must be before vaccine batch expiry date.");
         }
 
+        // Step 1: Create the notice
         VaccinationNotice notice = new VaccinationNotice();
         notice.setTitle(request.getTitle());
         notice.setDescription(request.getDescription());
         notice.setVaccineName(batch.getVaccine().getName());
-        notice.setVaccinationDate(request.getVaccinationDate());
+        notice.setVaccinationDate(vaccinationDate);
         notice.setCreatedAt(today);
         notice.setVaccineBatch(batch);
         notice.setGrade(request.getGrade());
 
         VaccinationNotice saved = vaccinationNoticeRepository.save(notice);
-        return mapToResponse(saved); // ✅ Now return response
+
+        // Step 2: Find all students in the specified grade
+        List<Account> students = accountRepository.findAll().stream()
+                .filter(account -> account.getRole().getRoleId() == 1) // assuming roleId 1 = Student
+                .filter(account -> account.getClazz() != null && account.getClazz().getGrade() == request.getGrade())
+                .toList();
+
+        // Step 3: For each student, find their parent and insert VaccinationConfirmation
+        for (Account student : students) {
+            List<StudentParent> links = student.getStudentParents(); // students mapped to parents
+
+            for (StudentParent sp : links) {
+                VaccinationConfirmation confirmation = new VaccinationConfirmation();
+                confirmation.setVaccinationNotice(saved);
+                confirmation.setStudent(student);
+                confirmation.setParent(sp.getParent());
+                confirmation.setStatus("PENDING");
+                confirmation.setConfirmedAt(null);
+                vaccinationConfirmationRepository.save(confirmation);
+            }
+        }
+
+        return mapToResponse(saved);
     }
 
 
@@ -107,6 +136,7 @@ public class VaccinationNoticeServiceImpl implements VaccinationNoticeService {
                 .vaccinationDate(notice.getVaccinationDate()) // renamed
                 .createdAt(notice.getCreatedAt())
                 .grade(notice.getGrade())
+                .batchId(notice.getVaccineBatch().getVaccineBatchId())
                 .build();
     }
 
@@ -126,5 +156,44 @@ public class VaccinationNoticeServiceImpl implements VaccinationNoticeService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<VaccinationNoticeResponse> getActiveNoticesByParent(UUID parentId) {
+        List<Integer> childGrades = studentParentRepository.findChildrenGradesByParentId(parentId);
+        if (childGrades.isEmpty()) {
+            return List.of(); // No children → return empty list
+        }
+
+        LocalDate today = LocalDate.now();
+        List<VaccinationNotice> notices = vaccinationNoticeRepository
+                .findByGradeInAndVaccinationDateAfter(childGrades, today);
+
+        return notices.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VaccinationNoticeResponse> filterNotices(Long vaccineId, Long vaccineBatchId, LocalDate vaccinationDate, boolean exact) {
+        return vaccinationNoticeRepository.findAll().stream()
+                .filter(notice -> {
+                    if (vaccineId != null && !vaccineId.equals(notice.getVaccineBatch().getVaccine().getVaccineId())) {
+                        return false;
+                    }
+                    if (vaccineBatchId != null && !vaccineBatchId.equals(notice.getVaccineBatch().getVaccineBatchId())) {
+                        return false;
+                    }
+                    if (vaccinationDate != null) {
+                        if (exact && !notice.getVaccinationDate().isEqual(vaccinationDate)) {
+                            return false;
+                        }
+                        if (!exact && notice.getVaccinationDate().isBefore(vaccinationDate)) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
 
 } 

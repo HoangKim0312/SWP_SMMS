@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface ClassRepository extends JpaRepository<Class, Long> {
     boolean existsByClassName(String className);
+    
+    java.util.Optional<Class> findByClassName(String className);
 
     @Query("SELECT c FROM Class c WHERE c.grade = :grade AND c.schoolYear = :currentYear")
     List<Class> findByGradeAndCurrentYear(@Param("grade") String grade, @Param("currentYear") int currentYear);
