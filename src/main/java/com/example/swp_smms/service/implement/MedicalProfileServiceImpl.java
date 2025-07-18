@@ -1,123 +1,143 @@
 package com.example.swp_smms.service.implement;
 
-import com.example.swp_smms.model.entity.Account;
-import com.example.swp_smms.model.entity.MedicalProfile;
+import com.example.swp_smms.model.entity.*;
 import com.example.swp_smms.model.payload.request.MedicalProfileRequest;
-import com.example.swp_smms.model.payload.response.ListMedicalProfileResponse;
 import com.example.swp_smms.model.payload.response.MedicalProfileResponse;
-import com.example.swp_smms.repository.AccountRepository;
-import com.example.swp_smms.repository.MedicalProfileRepository;
-import com.example.swp_smms.repository.RoleRepository;
+import com.example.swp_smms.repository.*;
 import com.example.swp_smms.service.MedicalProfileService;
-import jakarta.transaction.Transactional;
-import org.modelmapper.ModelMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
-
 @Service
+@RequiredArgsConstructor
 public class MedicalProfileServiceImpl implements MedicalProfileService {
 
-    @Autowired
-    private AccountRepository accountRepository;
+    private final AccountRepository accountRepository;
+    private final MedicalProfileRepository medicalProfileRepository;
+    private final AllergenRepository allergenRepository;
+    private final DiseaseRepository diseaseRepository;
+    private final SyndromeDisabilityRepository conditionRepository;
 
-    @Autowired
-    private MedicalProfileRepository medicalProfileRepository;
+    public MedicalProfileResponse mapToResponse(MedicalProfile profile) {
+        MedicalProfileResponse response = new MedicalProfileResponse();
+        response.setMedicalProfileId(profile.getMedicalProfileId());
+        response.setActive(profile.isActive());
+        response.setLastUpdated(profile.getLastUpdated());
+        response.setStudentId(profile.getStudent().getAccountId());
 
-    @Autowired
-    private RoleRepository roleRepository;
+        response.setAllergies(profile.getAllergies().stream().map(allergy -> {
+            MedicalProfileResponse.AllergyDTO dto = new MedicalProfileResponse.AllergyDTO();
+            dto.setAllergenId(allergy.getAllergen().getAllergenId());
+            dto.setAllergenName(allergy.getAllergen().getName());
+            dto.setReaction(allergy.getReaction());
+            dto.setSeverity(allergy.getSeverity());
+            dto.setLifeThreatening(allergy.isLifeThreatening());
+            return dto;
+        }).toList());
 
-    @Autowired
-    private ModelMapper modelMapper;
+        response.setDiseases(profile.getDiseases().stream().map(disease -> {
+            MedicalProfileResponse.DiseaseDTO dto = new MedicalProfileResponse.DiseaseDTO();
+            dto.setDiseaseId(disease.getDisease().getDiseaseId());
+            dto.setDiseaseName(disease.getDisease().getName());
+            dto.setSinceDate(disease.getSinceDate());
+            dto.setSeverity(disease.getSeverity());
+            return dto;
+        }).toList());
 
-    @Override
-    public MedicalProfileResponse createMedicalProfile(UUID studentId, Long recordID, MedicalProfileRequest request) {
+        response.setConditions(profile.getConditions().stream().map(cond -> {
+            MedicalProfileResponse.ConditionDTO dto = new MedicalProfileResponse.ConditionDTO();
+            dto.setConditionId(cond.getSyndromeDisability().getConditionId());
+            dto.setConditionName(cond.getSyndromeDisability().getName());
+            dto.setNote(cond.getNote());
+            return dto;
+        }).toList());
 
-        if (!accountRepository.existsByAccountIdAndRole_RoleId(studentId, 1L)) {
-            throw new RuntimeException("Student not exists or not a student");
+        StudentBasicHealthData bhd = profile.getBasicHealthData();
+        if (bhd != null) {
+            MedicalProfileResponse.BasicHealthDataDTO dto = new MedicalProfileResponse.BasicHealthDataDTO();
+            dto.setHeightCm(bhd.getHeightCm());
+            dto.setWeightKg(bhd.getWeightKg());
+            dto.setVisionLeft(bhd.getVisionLeft());
+            dto.setVisionRight(bhd.getVisionRight());
+            dto.setHearingStatus(bhd.getHearingStatus());
+            dto.setGender(bhd.getGender());
+            dto.setBloodType(bhd.getBloodType());
+            dto.setLastMeasured(bhd.getLastMeasured());
+            response.setBasicHealthData(dto);
         }
 
-        //NOT AVAILABLE, NEED FUTURE UPDATE:
-        //check if recordID is valid and studentID(record) = studentID(medicalProfile)
+        return response;
+    }
 
 
-        // Map request to entity
-        MedicalProfile profile = modelMapper.map(request, MedicalProfile.class);
+    @Override
+    public MedicalProfile createMedicalProfile(MedicalProfileRequest request) {
+        Account student = accountRepository.findById(request.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        // Set student entity
-        Account student = accountRepository.findAccountByAccountId(studentId);
+        MedicalProfile profile = new MedicalProfile();
         profile.setStudent(student);
+        profile.setActive(true);
+        profile.setLastUpdated(LocalDateTime.now());
 
-        // Set recordId
-        profile.setRecordId(recordID);
+        // Build allergy list
+        List<StudentAllergy> allergies = request.getAllergies().stream().map(dto -> {
+            Allergen allergen = allergenRepository.findById(dto.getAllergenId())
+                    .orElseThrow(() -> new RuntimeException("Allergen not found"));
+            StudentAllergy allergy = new StudentAllergy();
+            allergy.setAllergen(allergen);
+            allergy.setReaction(dto.getReaction());
+            allergy.setSeverity(dto.getSeverity());
+            allergy.setLifeThreatening(dto.isLifeThreatening());
+            allergy.setMedicalProfile(profile);
+            return allergy;
+        }).toList();
 
-        // Set date
-        String today = LocalDate.now().toString();
-        profile.setLastUpdated(today);
+        // Build disease list
+        List<StudentDisease> diseases = request.getDiseases().stream().map(dto -> {
+            Disease disease = diseaseRepository.findById(dto.getDiseaseId())
+                    .orElseThrow(() -> new RuntimeException("Disease not found"));
+            StudentDisease sd = new StudentDisease();
+            sd.setDisease(disease);
+            sd.setSinceDate(dto.getSinceDate());
+            sd.setSeverity(dto.getSeverity());
+            sd.setMedicalProfile(profile);
+            return sd;
+        }).toList();
 
-        // Save to DB
-        medicalProfileRepository.save(profile);
+        // Build conditions
+        List<StudentCondition> conditions = request.getConditions().stream().map(dto -> {
+            SyndromeDisability condition = conditionRepository.findById(dto.getConditionId())
+                    .orElseThrow(() -> new RuntimeException("Condition not found"));
+            StudentCondition sc = new StudentCondition();
+            sc.setSyndromeDisability(condition);
+            sc.setNote(dto.getNote());
+            sc.setMedicalProfile(profile);
+            return sc;
+        }).toList();
 
-        // Map to response and manually set studentId if not auto-mapped
-        MedicalProfileResponse response = modelMapper.map(profile, MedicalProfileResponse.class);
-        response.setStudentId(studentId);  // make sure MedicalProfileResponse has this field
-        return response;
+        // Basic health data
+        StudentBasicHealthData basicData = new StudentBasicHealthData();
+        MedicalProfileRequest.BasicHealthDataDTO bd = request.getBasicHealthData();
+        basicData.setMedicalProfile(profile);
+        basicData.setHeightCm(bd.getHeightCm());
+        basicData.setWeightKg(bd.getWeightKg());
+        basicData.setVisionLeft(bd.getVisionLeft());
+        basicData.setVisionRight(bd.getVisionRight());
+        basicData.setHearingStatus(bd.getHearingStatus());
+        basicData.setGender(bd.getGender());
+        basicData.setBloodType(bd.getBloodType());
+        basicData.setLastMeasured(bd.getLastMeasured());
+
+        // Set to profile
+        profile.setAllergies(allergies);
+        profile.setDiseases(diseases);
+        profile.setConditions(conditions);
+        profile.setBasicHealthData(basicData);
+
+        return medicalProfileRepository.save(profile);
     }
-
-    @Override
-    public MedicalProfileResponse getLastMedicalProfile(UUID studentId) {
-        Pageable pageable = PageRequest.of(0, 1); // Only get the latest one
-        List<MedicalProfile> latestProfiles = medicalProfileRepository.findMedicalProfilesByStudentId(studentId, pageable);
-
-        if (latestProfiles.isEmpty()) {
-            return null; // or throw a custom NotFoundException
-        }
-
-        MedicalProfile profile = latestProfiles.get(0);
-
-        // Map entity to response
-        MedicalProfileResponse response = modelMapper.map(profile, MedicalProfileResponse.class);
-        return response;
-    }
-
-
-    @Override
-    public ListMedicalProfileResponse getAllMedicalProfiles(UUID studentId) {
-
-        List<MedicalProfile> profiles = medicalProfileRepository.findMedicalProfilesByStudentId(studentId);
-
-        List<MedicalProfileResponse> responseList = profiles.stream()
-                .map(profile -> modelMapper.map(profile, MedicalProfileResponse.class))
-                .toList();
-
-        ListMedicalProfileResponse response = new ListMedicalProfileResponse();
-        response.setMedicalProfiles(responseList);
-        return response;
-    }
-
-    @Override
-    @Transactional
-    public void deleteMedicalProfile(UUID studentId, Long medicalProfileId) {
-        boolean exists = medicalProfileRepository.existsById(medicalProfileId);
-        if (!exists) {
-            throw new RuntimeException("Medical profile not found with ID: " + medicalProfileId);
-        }
-
-        // Optional: Check that the profile belongs to the student
-        MedicalProfile profile = medicalProfileRepository.findById(medicalProfileId)
-                .orElseThrow(() -> new RuntimeException("Medical profile not found"));
-
-        if (!profile.getStudent().getAccountId().equals(studentId)) {
-            throw new RuntimeException("This profile does not belong to the specified student.");
-        }
-
-        medicalProfileRepository.deleteByStudentIdAndMedicalProfileId(studentId, medicalProfileId);
-    }
-
 
 }

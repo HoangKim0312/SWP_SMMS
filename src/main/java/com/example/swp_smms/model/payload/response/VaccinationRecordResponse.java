@@ -21,5 +21,8 @@ public class VaccinationRecordResponse {
     private Long vaccineNoticeId;
     private String vaccineName;
     private String results;
+    private String reaction;
+    private Integer doseNumber;
+    private String note;
     private LocalDate date;
-} 
+}

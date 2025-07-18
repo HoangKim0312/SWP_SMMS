@@ -1,5 +1,6 @@
 package com.example.swp_smms.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,52 +51,68 @@ public class Account {
     @JoinColumn(name = "class_id")
     private Class clazz;
 
+    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private MedicalProfile medicalProfile;
+
     @OneToMany(mappedBy = "student")
-    private List<MedicalProfile> medicalProfiles;
-    
-    @OneToMany(mappedBy = "student")
+    @JsonIgnore
     private List<HealthEvent> healthEvents;
     
     @OneToMany(mappedBy = "nurse")
+    @JsonIgnore
     private List<HealthEvent> nurseHealthEvents;
     
     @OneToMany(mappedBy = "student")
+    @JsonIgnore
     private List<VaccinationRecord> vaccinationRecords;
     
     @OneToMany(mappedBy = "nurse")
+    @JsonIgnore
     private List<VaccinationRecord> nurseVaccinationRecords;
-    
+
     @OneToMany(mappedBy = "student")
+    @JsonIgnore
     private List<HealthCheckRecord> healthCheckRecords;
     
     @OneToMany(mappedBy = "nurse")
+    @JsonIgnore
     private List<HealthCheckRecord> nurseHealthCheckRecords;
     
     @OneToMany(mappedBy = "student")
+    @JsonIgnore
     private List<MedicationSent> medicationSents;
     
     @OneToMany(mappedBy = "student")
+    @JsonIgnore
     private List<StudentParent> studentParents;
     
     @OneToMany(mappedBy = "parent")
+    @JsonIgnore
     private List<StudentParent> parentStudents;
     
     @OneToMany(mappedBy = "student")
+    @JsonIgnore
     private List<HealthCheckConfirmation> healthCheckConfirmations;
     
     @OneToMany(mappedBy = "parent")
+    @JsonIgnore
     private List<HealthCheckConfirmation> parentHealthCheckConfirmations;
     
     @OneToMany(mappedBy = "student")
+    @JsonIgnore
     private List<VaccinationConfirmation> vaccinationConfirmations;
     
     @OneToMany(mappedBy = "parent")
+    @JsonIgnore
     private List<VaccinationConfirmation> parentVaccinationConfirmations;
     
     @Column(name = "email_notifications_enabled")
+    @JsonIgnore
     private Boolean emailNotificationsEnabled = true;
 
     @Column(name = "notification_types")
+    @JsonIgnore
     private String notificationTypes = "FOLLOW_UP,EMERGENCY";
     
     public boolean isLocked() {
