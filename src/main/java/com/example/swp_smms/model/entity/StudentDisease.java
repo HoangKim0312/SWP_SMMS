@@ -34,4 +34,7 @@ public class StudentDisease {
      */
     @Column(name = "severity", nullable = false)
     private int severity;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
 }

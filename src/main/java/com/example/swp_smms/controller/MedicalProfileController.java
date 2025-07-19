@@ -1,7 +1,9 @@
 package com.example.swp_smms.controller;
 
 import com.example.swp_smms.model.entity.MedicalProfile;
+import com.example.swp_smms.model.entity.StudentAllergy;
 import com.example.swp_smms.model.exception.ResponseBuilder;
+import com.example.swp_smms.model.payload.request.AddStudentAllergyRequest;
 import com.example.swp_smms.model.payload.request.MedicalProfileRequest;
 import com.example.swp_smms.model.payload.response.MedicalProfileResponse;
 import com.example.swp_smms.service.MedicalProfileService;
@@ -32,5 +34,9 @@ public class MedicalProfileController {
         } catch (Exception ex) {
             return ResponseBuilder.error("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+    @PostMapping("/allergy")
+    public ResponseEntity<StudentAllergy> addStudentAllergy(@RequestBody AddStudentAllergyRequest request) {
+        return ResponseEntity.ok(medicalProfileService.addStudentAllergy(request));
     }
 }

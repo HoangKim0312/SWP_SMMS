@@ -1,5 +1,6 @@
 package com.example.swp_smms.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,15 +25,18 @@ public class SyndromeDisability {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
+    @JsonIgnore
     private ConditionType type;
 
     /**
      * Priority from 1 (low concern) to 10 (critical concern)
      */
     @Column(name = "priority", nullable = false)
+    @JsonIgnore
     private int priority;
 
     @Column(name = "description", columnDefinition = "TEXT")
+    @JsonIgnore
     private String description;
 
     public enum ConditionType {

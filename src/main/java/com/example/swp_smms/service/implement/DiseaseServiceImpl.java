@@ -4,15 +4,16 @@ import com.example.swp_smms.model.entity.Disease;
 import com.example.swp_smms.model.payload.request.DiseaseRequest;
 import com.example.swp_smms.repository.DiseaseRepository;
 import com.example.swp_smms.service.DiseaseService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service
-public class DiseaseServiceImpl implements DiseaseService {
-    private final DiseaseRepository repository;
+import java.util.List;
 
-    public DiseaseServiceImpl(DiseaseRepository repository) {
-        this.repository = repository;
-    }
+@Service
+@RequiredArgsConstructor
+public class DiseaseServiceImpl implements DiseaseService {
+    private final DiseaseRepository diseaseRepository;
+
 
     @Override
     public Disease create(DiseaseRequest request) {
@@ -22,6 +23,16 @@ public class DiseaseServiceImpl implements DiseaseService {
         disease.setSeverityLevel(request.getSeverityLevel());
         disease.setChronic(request.isChronic());
         disease.setContagious(request.isContagious());
-        return repository.save(disease);
+        return diseaseRepository.save(disease);
     }
+    @Override
+    public List<Disease> getAll() {
+        return diseaseRepository.findAll();
+    }
+
+    @Override
+    public List<Disease> searchByName(String name) {
+        return diseaseRepository.findByNameContainingIgnoreCase(name);
+    }
+
 }

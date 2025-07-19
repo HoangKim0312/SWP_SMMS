@@ -1,5 +1,6 @@
 package com.example.swp_smms.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -22,12 +23,14 @@ public class Disease {
     private String name;
 
     @Column(name = "description", columnDefinition = "TEXT")
+    @JsonIgnore
     private String description;
 
     /**
      * Severity scale from 1 (least severe) to 10 (most severe)
      */
     @Column(name = "severity_level", nullable = false)
+    @JsonIgnore
     private int severityLevel;
     /*
         1–3: Mild (e.g., seasonal allergies)
@@ -36,8 +39,10 @@ public class Disease {
      */
 
     @Column(name = "chronic", nullable = false)
+    @JsonIgnore
     private boolean chronic;
 
     @Column(name = "contagious", nullable = false)
+    @JsonIgnore
     private boolean contagious;
 }

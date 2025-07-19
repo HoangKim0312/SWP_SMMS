@@ -33,10 +33,6 @@ public class VaccinationRecord {
     @JoinColumn(name = "vaccine_id")
     private Vaccine vaccine;
 
-    @ManyToOne
-    @JoinColumn(name = "medical_profile_id")
-    private MedicalProfile medicalProfile;
-
     @Column(name = "results")
     private String results;
 

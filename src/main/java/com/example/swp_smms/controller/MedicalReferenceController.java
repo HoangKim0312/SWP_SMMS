@@ -38,4 +38,32 @@ public class MedicalReferenceController {
     public ResponseEntity<SyndromeDisability> createSyndrome(@RequestBody SyndromeDisabilityRequest request) {
         return ResponseEntity.ok(syndromeService.create(request));
     }
+
+    @GetMapping("/allergens/search")
+    public ResponseEntity<?> searchAllergens(@RequestParam(required = false, defaultValue = "") String name) {
+        if (name.isBlank()) {
+            return ResponseEntity.ok(allergenService.getAll());
+        } else {
+            return ResponseEntity.ok(allergenService.searchByName(name));
+        }
+    }
+
+    @GetMapping("/diseases/search")
+    public ResponseEntity<?> searchDiseases(@RequestParam(required = false, defaultValue = "") String name) {
+        if (name.isBlank()) {
+            return ResponseEntity.ok(diseaseService.getAll());
+        } else {
+            return ResponseEntity.ok(diseaseService.searchByName(name));
+        }
+    }
+    @GetMapping("/syndromes/search")
+    public ResponseEntity<?> searchSyndromes(@RequestParam(required = false, defaultValue = "") String name) {
+        if (name.isBlank()) {
+            return ResponseEntity.ok(syndromeService.getAll());
+        } else {
+            return ResponseEntity.ok(syndromeService.searchByName(name));
+        }
+    }
+
+
 }

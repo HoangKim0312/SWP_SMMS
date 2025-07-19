@@ -1,6 +1,7 @@
 package com.example.swp_smms.service.implement;
 
 import com.example.swp_smms.model.entity.*;
+import com.example.swp_smms.model.payload.request.AddStudentAllergyRequest;
 import com.example.swp_smms.model.payload.request.MedicalProfileRequest;
 import com.example.swp_smms.model.payload.response.MedicalProfileResponse;
 import com.example.swp_smms.repository.*;
@@ -19,6 +20,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
     private final AllergenRepository allergenRepository;
     private final DiseaseRepository diseaseRepository;
     private final SyndromeDisabilityRepository conditionRepository;
+    private final StudentAllergyRepository studentAllergyRepository;
 
     public MedicalProfileResponse mapToResponse(MedicalProfile profile) {
         MedicalProfileResponse response = new MedicalProfileResponse();
@@ -92,6 +94,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
             allergy.setSeverity(dto.getSeverity());
             allergy.setLifeThreatening(dto.isLifeThreatening());
             allergy.setMedicalProfile(profile);
+            allergy.setActive(true);
             return allergy;
         }).toList();
 
@@ -104,6 +107,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
             sd.setSinceDate(dto.getSinceDate());
             sd.setSeverity(dto.getSeverity());
             sd.setMedicalProfile(profile);
+            sd.setActive(true);
             return sd;
         }).toList();
 
@@ -115,6 +119,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
             sc.setSyndromeDisability(condition);
             sc.setNote(dto.getNote());
             sc.setMedicalProfile(profile);
+            sc.setActive(true);
             return sc;
         }).toList();
 
@@ -140,4 +145,25 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         return medicalProfileRepository.save(profile);
     }
 
+    @Override
+    public StudentAllergy addStudentAllergy(AddStudentAllergyRequest request) {
+        Account student = accountRepository.findById(request.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        MedicalProfile profile = medicalProfileRepository.findByStudentAndActiveTrue(student)
+                .orElseThrow(() -> new RuntimeException("Active medical profile not found"));
+
+        Allergen allergen = allergenRepository.findById(request.getAllergenId())
+                .orElseThrow(() -> new RuntimeException("Allergen not found"));
+
+        StudentAllergy allergy = new StudentAllergy();
+        allergy.setMedicalProfile(profile);
+        allergy.setAllergen(allergen);
+        allergy.setReaction(request.getReaction());
+        allergy.setSeverity(request.getSeverity());
+        allergy.setLifeThreatening(request.isLifeThreatening());
+        allergy.setActive(true); // new allergy should be active
+
+        return studentAllergyRepository.save(allergy);
+    }
 }

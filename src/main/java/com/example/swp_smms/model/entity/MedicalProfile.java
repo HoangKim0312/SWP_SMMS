@@ -27,7 +27,7 @@ public class MedicalProfile {
     private Account student;
 
     @Column(name = "is_active")
-    private boolean isActive = true;
+    private boolean active = true;
 
     @Column(name = "last_updated")
     private LocalDateTime lastUpdated;
@@ -43,14 +43,6 @@ public class MedicalProfile {
 
     @OneToOne(mappedBy = "medicalProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private StudentBasicHealthData basicHealthData;
-
-    @OneToMany(mappedBy = "medicalProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<StudentExternalVaccine> externalVaccines;
-
-    @OneToMany(mappedBy = "medicalProfile", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    private List<VaccinationRecord> vaccinationRecords;
 
     @OneToMany(mappedBy = "medicalProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

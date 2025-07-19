@@ -36,4 +36,8 @@ public class StudentAllergy {
 
     @Column(name = "is_life_threatening", nullable = false)
     private boolean isLifeThreatening;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
+
 }

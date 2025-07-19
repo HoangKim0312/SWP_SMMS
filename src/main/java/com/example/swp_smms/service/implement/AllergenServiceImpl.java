@@ -4,20 +4,28 @@ import com.example.swp_smms.model.entity.Allergen;
 import com.example.swp_smms.model.payload.request.AllergenRequest;
 import com.example.swp_smms.repository.AllergenRepository;
 import com.example.swp_smms.service.AllergenService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-@Service
-public class AllergenServiceImpl implements AllergenService {
-    private final AllergenRepository repository;
+import java.util.List;
 
-    public AllergenServiceImpl(AllergenRepository repository) {
-        this.repository = repository;
-    }
+@Service
+@RequiredArgsConstructor
+public class AllergenServiceImpl implements AllergenService {
+    private final AllergenRepository allergenRepository;
 
     @Override
     public Allergen create(AllergenRequest request) {
         Allergen allergen = new Allergen();
         allergen.setName(request.getName());
-        return repository.save(allergen);
+        return allergenRepository.save(allergen);
+    }
+    @Override
+    public List<Allergen> searchByName(String name) {
+        return allergenRepository.findByNameContainingIgnoreCase(name);
+    }
+    @Override
+    public List<Allergen> getAll() {
+        return allergenRepository.findAll();
     }
 }

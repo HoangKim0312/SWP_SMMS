@@ -29,4 +29,6 @@ public interface MedicalProfileRepository extends JpaRepository<MedicalProfile, 
     void deleteByStudentIdAndMedicalProfileId(@Param("studentId") UUID studentId,
                                               @Param("medicalProfileId") Long medicalProfileId);
 
+    Optional<MedicalProfile> findByStudentAndActiveTrue(Account student);
+
 }

@@ -26,4 +26,7 @@ public class StudentCondition {
 
     @Column(name = "note")
     private String note;
+
+    @Column(name = "active", nullable = false)
+    private boolean active = true;
 }

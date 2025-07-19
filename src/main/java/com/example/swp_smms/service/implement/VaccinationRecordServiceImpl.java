@@ -50,7 +50,6 @@ public class VaccinationRecordServiceImpl implements VaccinationRecordService {
         record.setNurse(nurse);
         record.setVaccinationNotice(notice);
         record.setVaccine(vaccine);
-        record.setMedicalProfile(medicalProfile);
         record.setResults(request.getResults());
         record.setReaction(request.getReaction());
         record.setDoseNumber(request.getDoseNumber());
