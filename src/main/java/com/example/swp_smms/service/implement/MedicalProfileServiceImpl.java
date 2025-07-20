@@ -1,8 +1,7 @@
 package com.example.swp_smms.service.implement;
 
 import com.example.swp_smms.model.entity.*;
-import com.example.swp_smms.model.payload.request.AddStudentAllergyRequest;
-import com.example.swp_smms.model.payload.request.MedicalProfileRequest;
+import com.example.swp_smms.model.payload.request.*;
 import com.example.swp_smms.model.payload.response.MedicalProfileResponse;
 import com.example.swp_smms.repository.*;
 import com.example.swp_smms.service.MedicalProfileService;
@@ -11,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 public class MedicalProfileServiceImpl implements MedicalProfileService {
@@ -21,6 +22,9 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
     private final DiseaseRepository diseaseRepository;
     private final SyndromeDisabilityRepository conditionRepository;
     private final StudentAllergyRepository studentAllergyRepository;
+    private final StudentDiseaseRepository studentDiseaseRepository;
+    private final SyndromeDisabilityRepository syndromeDisabilityRepository;
+    private final StudentConditionRepository studentConditionRepository;
 
     public MedicalProfileResponse mapToResponse(MedicalProfile profile) {
         MedicalProfileResponse response = new MedicalProfileResponse();
@@ -69,6 +73,82 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
             dto.setLastMeasured(bhd.getLastMeasured());
             response.setBasicHealthData(dto);
         }
+
+        return response;
+    }
+
+    @Override
+    public MedicalProfileResponse getFullMedicalProfile(String studentId) {
+        UUID studentUUID = UUID.fromString(studentId);
+
+        Account student = accountRepository.findById(studentUUID)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        MedicalProfile profile = medicalProfileRepository.findByStudentAndActiveTrue(student)
+                .orElseThrow(() -> new RuntimeException("Active medical profile not found"));
+
+        MedicalProfileResponse response = new MedicalProfileResponse();
+        response.setMedicalProfileId(profile.getMedicalProfileId());
+        response.setActive(profile.isActive());
+        response.setLastUpdated(profile.getLastUpdated());
+        response.setStudentId(student.getAccountId());
+
+        // Basic Health Data
+        if (profile.getBasicHealthData() != null) {
+            var bh = profile.getBasicHealthData();
+            MedicalProfileResponse.BasicHealthDataDTO bhDto = new MedicalProfileResponse.BasicHealthDataDTO();
+            bhDto.setHeightCm(bh.getHeightCm());
+            bhDto.setWeightKg(bh.getWeightKg());
+            bhDto.setVisionLeft(bh.getVisionLeft());
+            bhDto.setVisionRight(bh.getVisionRight());
+            bhDto.setHearingStatus(bh.getHearingStatus());
+            bhDto.setGender(bh.getGender());
+            bhDto.setBloodType(bh.getBloodType());
+            bhDto.setLastMeasured(bh.getLastMeasured() != null ? bh.getLastMeasured().toString() : null);
+            response.setBasicHealthData(bhDto);
+        }
+
+        // Allergies
+        List<MedicalProfileResponse.AllergyDTO> allergyDtos = profile.getAllergies().stream()
+                .filter(StudentAllergy::isActive)
+                .map(allergy -> {
+                    var dto = new MedicalProfileResponse.AllergyDTO();
+                    dto.setAllergenId(allergy.getAllergen().getAllergenId());
+                    dto.setAllergenName(allergy.getAllergen().getName());
+                    dto.setReaction(allergy.getReaction());
+                    dto.setSeverity(allergy.getSeverity());
+                    dto.setLifeThreatening(allergy.isLifeThreatening());
+                    return dto;
+                })
+                .toList();
+        response.setAllergies(allergyDtos);
+
+        // Diseases
+        List<MedicalProfileResponse.DiseaseDTO> diseaseDtos = profile.getDiseases().stream()
+                .filter(StudentDisease::isActive)
+                .map(disease -> {
+                    var dto = new MedicalProfileResponse.DiseaseDTO();
+                    dto.setDiseaseId(disease.getDisease().getDiseaseId());
+                    dto.setDiseaseName(disease.getDisease().getName());
+                    dto.setSeverity(disease.getSeverity());
+                    dto.setSinceDate(disease.getSinceDate() != null ? disease.getSinceDate().toString() : null);
+                    return dto;
+                })
+                .toList();
+        response.setDiseases(diseaseDtos);
+
+        // Conditions
+        List<MedicalProfileResponse.ConditionDTO> conditionDtos = profile.getConditions().stream()
+                .filter(StudentCondition::isActive)
+                .map(condition -> {
+                    var dto = new MedicalProfileResponse.ConditionDTO();
+                    dto.setConditionId(condition.getSyndromeDisability().getConditionId());
+                    dto.setConditionName(condition.getSyndromeDisability().getName());
+                    dto.setNote(condition.getNote());
+                    return dto;
+                })
+                .toList();
+        response.setConditions(conditionDtos);
 
         return response;
     }
@@ -146,7 +226,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
     }
 
     @Override
-    public StudentAllergy addStudentAllergy(AddStudentAllergyRequest request) {
+    public StudentAllergy addAllergyToStudentProfile(AddAllergyToMedicalProfileRequest request) {
         Account student = accountRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
@@ -156,14 +236,59 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         Allergen allergen = allergenRepository.findById(request.getAllergenId())
                 .orElseThrow(() -> new RuntimeException("Allergen not found"));
 
-        StudentAllergy allergy = new StudentAllergy();
-        allergy.setMedicalProfile(profile);
-        allergy.setAllergen(allergen);
-        allergy.setReaction(request.getReaction());
-        allergy.setSeverity(request.getSeverity());
-        allergy.setLifeThreatening(request.isLifeThreatening());
-        allergy.setActive(true); // new allergy should be active
+        StudentAllergy newAllergy = new StudentAllergy();
+        newAllergy.setMedicalProfile(profile);
+        newAllergy.setAllergen(allergen);
+        newAllergy.setReaction(request.getReaction());
+        newAllergy.setSeverity(request.getSeverity());
+        newAllergy.setLifeThreatening(request.isLifeThreatening());
+        newAllergy.setActive(true);
 
-        return studentAllergyRepository.save(allergy);
+        return studentAllergyRepository.save(newAllergy);
     }
+
+    @Override
+    public StudentDisease addStudentDisease(AddStudentDiseaseRequest request) {
+        UUID studentUUID = UUID.fromString(request.getStudentId());
+
+        Account student = accountRepository.findById(studentUUID)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        MedicalProfile profile = medicalProfileRepository.findByStudentAndActiveTrue(student)
+                .orElseThrow(() -> new RuntimeException("Active medical profile not found for student"));
+
+        Disease disease = diseaseRepository.findById(request.getDiseaseId())
+                .orElseThrow(() -> new RuntimeException("Disease not found"));
+
+        StudentDisease studentDisease = new StudentDisease();
+        studentDisease.setMedicalProfile(profile);
+        studentDisease.setDisease(disease);
+        studentDisease.setSinceDate(request.getSinceDate());
+        studentDisease.setSeverity(request.getSeverity());
+        studentDisease.setActive(true);
+
+        return studentDiseaseRepository.save(studentDisease);
+    }
+
+    public StudentCondition addStudentCondition(AddStudentConditionRequest request) {
+        UUID studentUUID = UUID.fromString(request.getStudentId());
+
+        Account student = accountRepository.findById(studentUUID)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        MedicalProfile profile = medicalProfileRepository.findByStudentAndActiveTrue(student)
+                .orElseThrow(() -> new RuntimeException("Active medical profile not found"));
+
+        SyndromeDisability condition = syndromeDisabilityRepository.findById(request.getConditionId())
+                .orElseThrow(() -> new RuntimeException("Condition not found"));
+
+        StudentCondition studentCondition = new StudentCondition();
+        studentCondition.setMedicalProfile(profile);
+        studentCondition.setSyndromeDisability(condition);
+        studentCondition.setNote(request.getNote());
+        studentCondition.setActive(true);
+
+        return studentConditionRepository.save(studentCondition);
+    }
+
 }
