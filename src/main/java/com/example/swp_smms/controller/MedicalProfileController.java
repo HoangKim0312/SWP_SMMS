@@ -36,7 +36,7 @@ public class MedicalProfileController {
     }
 
 
-    @PostMapping
+    @PostMapping("/create-medical-profile")
     public ResponseEntity<?> createMedicalProfile(@RequestBody MedicalProfileRequest request) {
         try {
             MedicalProfile profile = medicalProfileService.createMedicalProfile(request);
