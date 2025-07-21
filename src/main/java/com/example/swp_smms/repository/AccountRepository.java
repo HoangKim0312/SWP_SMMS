@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface AccountRepository extends JpaRepository<Account, UUID> {
+public interface AccountRepository extends JpaRepository<Account, UUID>,CustomAccountRepository {
     Optional<Account> findByUsername(String username);
     Optional<Account> findByEmail(String email);
     boolean existsByAccountIdAndRole_RoleId(UUID accountId, Long roleId);
@@ -41,5 +41,7 @@ public interface AccountRepository extends JpaRepository<Account, UUID> {
             "FROM Account a " +
             "WHERE a.role.roleId = 1 AND a.clazz.classId = :classId")
     List<ChildData> findChildDataByClassId(@Param("classId") Long classId);
+
+
 
 }

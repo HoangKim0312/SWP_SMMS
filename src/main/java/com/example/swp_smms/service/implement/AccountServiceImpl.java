@@ -2,6 +2,7 @@ package com.example.swp_smms.service.implement;
 
 import com.example.swp_smms.model.entity.Account;
 import com.example.swp_smms.model.entity.Role;
+import com.example.swp_smms.model.payload.request.AccountFilterRequest;
 import com.example.swp_smms.model.payload.request.AccountRequest;
 import com.example.swp_smms.model.payload.request.AccountUpdateRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
@@ -183,5 +184,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
 
+
+    @Override
+    public Page<AccountResponse> filterAccounts(AccountFilterRequest request) {
+        return accountRepository.filterStudents(request);
+    }
 
 }

@@ -1,11 +1,13 @@
 package com.example.swp_smms.service;
 
+import com.example.swp_smms.model.payload.request.AccountFilterRequest;
 import com.example.swp_smms.model.payload.request.AccountRequest;
 import com.example.swp_smms.model.payload.request.AccountUpdateRequest;
 import com.example.swp_smms.model.payload.request.ChangePasswordRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
 import com.example.swp_smms.model.payload.response.ChildData;
 import com.example.swp_smms.model.payload.response.PagedAccountResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -20,4 +22,6 @@ public interface AccountService {
     PagedAccountResponse getAccountsByRole(Long roleId, Pageable pageable, String name);
     List<ChildData> getChildDataByClassId(Long classId);
 
+
+    Page<AccountResponse> filterAccounts(AccountFilterRequest request);
 }
