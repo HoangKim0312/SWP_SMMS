@@ -5,6 +5,7 @@ import com.example.swp_smms.model.payload.request.*;
 import com.example.swp_smms.model.payload.response.MedicalProfileResponse;
 import com.example.swp_smms.repository.*;
 import com.example.swp_smms.service.MedicalProfileService;
+import com.example.swp_smms.service.SnapshotService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,16 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
     private final StudentDiseaseRepository studentDiseaseRepository;
     private final SyndromeDisabilityRepository syndromeDisabilityRepository;
     private final StudentConditionRepository studentConditionRepository;
+    private final SnapshotService snapshotService;
+
+    private void takeSnapshotForProfile(MedicalProfile profile) {
+        try {
+            snapshotService.createSnapshot(profile.getMedicalProfileId());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create snapshot: " + e.getMessage(), e);
+        }
+    }
+
 
     public MedicalProfileResponse mapToResponse(MedicalProfile profile) {
         MedicalProfileResponse response = new MedicalProfileResponse();
@@ -97,6 +108,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         if (profile.getBasicHealthData() != null) {
             var bh = profile.getBasicHealthData();
             MedicalProfileResponse.BasicHealthDataDTO bhDto = new MedicalProfileResponse.BasicHealthDataDTO();
+            bhDto.setStudentBasicHealthId(bh.getId());
             bhDto.setHeightCm(bh.getHeightCm());
             bhDto.setWeightKg(bh.getWeightKg());
             bhDto.setVisionLeft(bh.getVisionLeft());
@@ -113,6 +125,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
                 .filter(StudentAllergy::isActive)
                 .map(allergy -> {
                     var dto = new MedicalProfileResponse.AllergyDTO();
+                    dto.setStudentAllergyId(allergy.getStudentAllergyId());
                     dto.setAllergenId(allergy.getAllergen().getAllergenId());
                     dto.setAllergenName(allergy.getAllergen().getName());
                     dto.setReaction(allergy.getReaction());
@@ -124,31 +137,33 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         response.setAllergies(allergyDtos);
 
         // Diseases
-        List<MedicalProfileResponse.DiseaseDTO> diseaseDtos = profile.getDiseases().stream()
+        List<MedicalProfileResponse.DiseaseDTO> studentDiseaseDtos = profile.getDiseases().stream()
                 .filter(StudentDisease::isActive)
-                .map(disease -> {
+                .map(studentDisease -> {
                     var dto = new MedicalProfileResponse.DiseaseDTO();
-                    dto.setDiseaseId(disease.getDisease().getDiseaseId());
-                    dto.setDiseaseName(disease.getDisease().getName());
-                    dto.setSeverity(disease.getSeverity());
-                    dto.setSinceDate(disease.getSinceDate() != null ? disease.getSinceDate().toString() : null);
+                    dto.setStudentDiseaseId(studentDisease.getId());
+                    dto.setDiseaseId(studentDisease.getDisease().getDiseaseId());
+                    dto.setDiseaseName(studentDisease.getDisease().getName());
+                    dto.setSeverity(studentDisease.getSeverity());
+                    dto.setSinceDate(studentDisease.getSinceDate() != null ? studentDisease.getSinceDate().toString() : null);
                     return dto;
                 })
                 .toList();
-        response.setDiseases(diseaseDtos);
+        response.setDiseases(studentDiseaseDtos);
 
         // Conditions
-        List<MedicalProfileResponse.ConditionDTO> conditionDtos = profile.getConditions().stream()
+        List<MedicalProfileResponse.ConditionDTO> studentConditionDtos = profile.getConditions().stream()
                 .filter(StudentCondition::isActive)
-                .map(condition -> {
+                .map(studentCondition -> {
                     var dto = new MedicalProfileResponse.ConditionDTO();
-                    dto.setConditionId(condition.getSyndromeDisability().getConditionId());
-                    dto.setConditionName(condition.getSyndromeDisability().getName());
-                    dto.setNote(condition.getNote());
+                    dto.setStudentConditionId(studentCondition.getId());
+                    dto.setConditionId(studentCondition.getSyndromeDisability().getConditionId());
+                    dto.setConditionName(studentCondition.getSyndromeDisability().getName());
+                    dto.setNote(studentCondition.getNote());
                     return dto;
                 })
                 .toList();
-        response.setConditions(conditionDtos);
+        response.setConditions(studentConditionDtos);
 
         return response;
     }
@@ -222,7 +237,11 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         profile.setConditions(conditions);
         profile.setBasicHealthData(basicData);
 
-        return medicalProfileRepository.save(profile);
+        MedicalProfile savedProfile = medicalProfileRepository.save(profile);
+
+        takeSnapshotForProfile(savedProfile); //automatically saves snapshot after creating
+
+        return savedProfile;
     }
 
     @Override
@@ -243,8 +262,9 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         newAllergy.setSeverity(request.getSeverity());
         newAllergy.setLifeThreatening(request.isLifeThreatening());
         newAllergy.setActive(true);
-
-        return studentAllergyRepository.save(newAllergy);
+        StudentAllergy savedAllergy = studentAllergyRepository.save(newAllergy);
+        takeSnapshotForProfile(profile);
+        return savedAllergy;
     }
 
     @Override
@@ -267,9 +287,12 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         studentDisease.setSeverity(request.getSeverity());
         studentDisease.setActive(true);
 
-        return studentDiseaseRepository.save(studentDisease);
+        StudentDisease savedDisease = studentDiseaseRepository.save(studentDisease);
+        takeSnapshotForProfile(profile);
+        return savedDisease;
     }
 
+    @Override
     public StudentCondition addStudentCondition(AddStudentConditionRequest request) {
         UUID studentUUID = UUID.fromString(request.getStudentId());
 
@@ -288,7 +311,78 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         studentCondition.setNote(request.getNote());
         studentCondition.setActive(true);
 
-        return studentConditionRepository.save(studentCondition);
+        StudentCondition savedCondition = studentConditionRepository.save(studentCondition);
+        takeSnapshotForProfile(profile);
+        return savedCondition;
+    }
+
+
+    @Override
+    public StudentAllergy updateAllergyActiveStatus(Long studentAllergyId, boolean active) {
+        StudentAllergy allergy = studentAllergyRepository.findById(studentAllergyId)
+                .orElseThrow(() -> new RuntimeException("StudentAllergy not found with ID: " + studentAllergyId));
+        allergy.setActive(active);
+        StudentAllergy saved = studentAllergyRepository.save(allergy);
+        takeSnapshotForProfile(allergy.getMedicalProfile());
+        return saved;
+
+    }
+
+    @Override
+    public StudentDisease updateDiseaseActiveStatus(Long id, boolean active) {
+        StudentDisease disease = studentDiseaseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("StudentDisease not found with ID: " + id));
+        disease.setActive(active);
+        StudentDisease saved = studentDiseaseRepository.save(disease);
+        takeSnapshotForProfile(disease.getMedicalProfile());
+        return saved;
+    }
+
+    @Override
+    public StudentCondition updateConditionActiveStatus(Long id, boolean active) {
+        StudentCondition condition = studentConditionRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("StudentCondition not found with ID: " + id));
+        condition.setActive(active);
+        StudentCondition saved = studentConditionRepository.save(condition);
+        takeSnapshotForProfile(condition.getMedicalProfile());
+        return saved;
+
+    }
+
+    @Override
+    public StudentAllergy updateStudentAllergy(UpdateStudentAllergyRequest request) {
+        StudentAllergy allergy = studentAllergyRepository.findById(request.getStudentAllergyId())
+                .orElseThrow(() -> new RuntimeException("StudentAllergy not found with ID: " + request.getStudentAllergyId()));
+
+        allergy.setReaction(request.getReaction());
+        allergy.setSeverity(request.getSeverity());
+        allergy.setLifeThreatening(request.isLifeThreatening());
+
+        StudentAllergy saved = studentAllergyRepository.save(allergy);
+        takeSnapshotForProfile(allergy.getMedicalProfile());
+        return saved;
+    }
+    @Override
+    public StudentDisease updateStudentDisease(UpdateStudentDiseaseRequest request) {
+        StudentDisease disease = studentDiseaseRepository.findById(request.getId())
+                .orElseThrow(() -> new RuntimeException("StudentDisease not found with ID: " + request.getId()));
+
+        disease.setSeverity(request.getSeverity());
+
+        StudentDisease saved = studentDiseaseRepository.save(disease);
+        takeSnapshotForProfile(disease.getMedicalProfile());
+        return saved;
+    }
+    @Override
+    public StudentCondition updateStudentCondition(UpdateStudentConditionRequest request) {
+        StudentCondition condition = studentConditionRepository.findById(request.getId())
+                .orElseThrow(() -> new RuntimeException("StudentCondition not found with ID: " + request.getId()));
+
+        condition.setNote(request.getNote());
+
+        StudentCondition saved = studentConditionRepository.save(condition);
+        takeSnapshotForProfile(condition.getMedicalProfile());
+        return saved;
     }
 
 }

@@ -85,4 +85,43 @@ public class MedicalProfileController {
     }
 
 
+    @PostMapping("/allergy/update-active")
+    public ResponseEntity<?> updateAllergyActiveStatus(@RequestBody UpdateStudentLinksActiveRequest request) {
+        try {
+            StudentAllergy updated = medicalProfileService.updateAllergyActiveStatus(request.getId(), request.isActive());
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException ex) {
+            return ResponseBuilder.error(ex.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception ex) {
+            return ResponseBuilder.error("Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+    @PutMapping("/allergy/update")
+    public ResponseEntity<?> updateStudentAllergy(@RequestBody UpdateStudentAllergyRequest request) {
+        StudentAllergy updated = medicalProfileService.updateStudentAllergy(request);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/disease/update-active")
+    public ResponseEntity<?> updateDisease(@RequestBody UpdateStudentLinksActiveRequest request) {
+        StudentDisease updated = medicalProfileService.updateDiseaseActiveStatus(request.getId(), request.isActive());
+        return ResponseEntity.ok(updated);
+    }
+    @PutMapping("/disease/update")
+    public ResponseEntity<?> updateStudentDisease(@RequestBody UpdateStudentDiseaseRequest request) {
+        StudentDisease updated = medicalProfileService.updateStudentDisease(request);
+        return ResponseEntity.ok(updated);
+    }
+
+    @PostMapping("/condition/update-active")
+    public ResponseEntity<?> updateCondition(@RequestBody UpdateStudentLinksActiveRequest request) {
+        StudentCondition updated = medicalProfileService.updateConditionActiveStatus(request.getId(), request.isActive());
+        return ResponseEntity.ok(updated);
+    }
+    @PutMapping("/condition/update")
+    public ResponseEntity<?> updateStudentCondition(@RequestBody UpdateStudentConditionRequest request) {
+        StudentCondition updated = medicalProfileService.updateStudentCondition(request);
+        return ResponseEntity.ok(updated);
+    }
+
 }

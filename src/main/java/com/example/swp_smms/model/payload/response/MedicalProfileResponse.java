@@ -20,6 +20,7 @@ public class MedicalProfileResponse {
 
     @Data
     public static class AllergyDTO {
+        private Long studentAllergyId;
         private Long allergenId;
         private String allergenName;
         private String reaction;
@@ -29,6 +30,7 @@ public class MedicalProfileResponse {
 
     @Data
     public static class DiseaseDTO {
+        private Long studentDiseaseId;
         private Long diseaseId;
         private String diseaseName;
         private String sinceDate;
@@ -37,6 +39,7 @@ public class MedicalProfileResponse {
 
     @Data
     public static class ConditionDTO {
+        private Long studentConditionId;
         private Long conditionId;
         private String conditionName;
         private String note;
@@ -44,6 +47,7 @@ public class MedicalProfileResponse {
 
     @Data
     public static class BasicHealthDataDTO {
+        private Long studentBasicHealthId;
         private Double heightCm;
         private Double weightKg;
         private String visionLeft;

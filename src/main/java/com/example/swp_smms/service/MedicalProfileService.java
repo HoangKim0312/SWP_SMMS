@@ -17,4 +17,11 @@ public interface MedicalProfileService {
     StudentDisease addStudentDisease(AddStudentDiseaseRequest request);
     StudentCondition addStudentCondition(AddStudentConditionRequest request);
     MedicalProfileResponse getFullMedicalProfile(String studentId);
+    StudentAllergy updateAllergyActiveStatus(Long studentAllergyId, boolean active);
+    StudentDisease updateDiseaseActiveStatus(Long studentAllergyId, boolean active);
+    StudentCondition updateConditionActiveStatus(Long studentAllergyId, boolean active);
+    StudentAllergy updateStudentAllergy(UpdateStudentAllergyRequest request);
+    StudentDisease updateStudentDisease(UpdateStudentDiseaseRequest request);
+    StudentCondition updateStudentCondition(UpdateStudentConditionRequest request);
+
 }
