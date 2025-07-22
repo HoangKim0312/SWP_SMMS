@@ -7,6 +7,7 @@ import com.example.swp_smms.model.payload.request.ChangePasswordRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
 import com.example.swp_smms.model.payload.response.ChildData;
 import com.example.swp_smms.model.payload.response.PagedAccountResponse;
+import com.example.swp_smms.model.payload.response.StudentMedicalSummaryResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -22,6 +23,7 @@ public interface AccountService {
     PagedAccountResponse getAccountsByRole(Long roleId, Pageable pageable, String name);
     List<ChildData> getChildDataByClassId(Long classId);
 
+    StudentMedicalSummaryResponse getStudentMedicalSummary(UUID studentId);
 
     Page<AccountResponse> filterAccounts(AccountFilterRequest request);
 }
