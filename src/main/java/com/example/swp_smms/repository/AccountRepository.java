@@ -42,6 +42,23 @@ public interface AccountRepository extends JpaRepository<Account, UUID>,CustomAc
             "WHERE a.role.roleId = 1 AND a.clazz.classId = :classId")
     List<ChildData> findChildDataByClassId(@Param("classId") Long classId);
 
+    @Query("""
+    SELECT DISTINCT a
+    FROM Account a
+    WHERE a.clazz.grade = :grade
+      AND a.role.roleId = 1
+      AND a.medicalProfile IS NOT NULL
+      AND NOT EXISTS (
+          SELECT sd
+          FROM StudentDisease sd
+          WHERE sd.medicalProfile = a.medicalProfile
+            AND sd.disease.diseaseId IN :excludedDiseaseIds
+            AND sd.active = true
+      )
+    """)
+    List<Account> findEligibleStudentsForNotice(@Param("grade") int grade,
+                                                @Param("excludedDiseaseIds") List<Long> excludedDiseaseIds);
+
 
 
 }

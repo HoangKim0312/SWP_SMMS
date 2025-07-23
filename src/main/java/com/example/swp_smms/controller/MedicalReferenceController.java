@@ -6,6 +6,7 @@ import com.example.swp_smms.model.entity.SyndromeDisability;
 import com.example.swp_smms.model.payload.request.AllergenRequest;
 import com.example.swp_smms.model.payload.request.DiseaseRequest;
 import com.example.swp_smms.model.payload.request.SyndromeDisabilityRequest;
+import com.example.swp_smms.model.payload.response.DiseaseResponse;
 import com.example.swp_smms.service.AllergenService;
 import com.example.swp_smms.service.DiseaseService;
 import com.example.swp_smms.service.SyndromeDisabilityService;
@@ -15,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/reference")
 @RequiredArgsConstructor
@@ -49,13 +53,15 @@ public class MedicalReferenceController {
     }
 
     @GetMapping("/diseases/search")
-    public ResponseEntity<?> searchDiseases(@RequestParam(required = false, defaultValue = "") String name) {
+    public ResponseEntity<List<DiseaseResponse>> searchDiseases(
+            @RequestParam(required = false, defaultValue = "") String name) {
         if (name.isBlank()) {
             return ResponseEntity.ok(diseaseService.getAll());
         } else {
             return ResponseEntity.ok(diseaseService.searchByName(name));
         }
     }
+
     @GetMapping("/syndromes/search")
     public ResponseEntity<?> searchSyndromes(@RequestParam(required = false, defaultValue = "") String name) {
         if (name.isBlank()) {
