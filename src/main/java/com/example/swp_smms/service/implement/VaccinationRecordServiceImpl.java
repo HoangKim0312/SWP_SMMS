@@ -40,7 +40,6 @@ public class VaccinationRecordServiceImpl implements VaccinationRecordService {
         batch.setQuantity(batch.getQuantity() - 1);
         vaccineBatchRepository.save(batch);
 
-        Vaccine vaccine = batch.getVaccine();
 
         MedicalProfile medicalProfile = medicalProfileRepository.findByStudent(student)
                 .orElseThrow(() -> new RuntimeException("Medical profile not found for student."));
@@ -49,7 +48,6 @@ public class VaccinationRecordServiceImpl implements VaccinationRecordService {
         record.setStudent(student);
         record.setNurse(nurse);
         record.setVaccinationNotice(notice);
-        record.setVaccine(vaccine);
         record.setResults(request.getResults());
         record.setReaction(request.getReaction());
         record.setDoseNumber(request.getDoseNumber());
@@ -131,7 +129,7 @@ public class VaccinationRecordServiceImpl implements VaccinationRecordService {
                 .nurseId(record.getNurse().getAccountId())
                 .nurseName(record.getNurse().getFullName())
                 .vaccineNoticeId(record.getVaccinationNotice().getVaccineNoticeId())
-                .vaccineName(record.getVaccine().getName())
+                .vaccineName(record.getVaccinationNotice().getVaccineBatch().getVaccine().getName())
                 .results(record.getResults())
                 .reaction(record.getReaction())
                 .doseNumber(record.getDoseNumber())

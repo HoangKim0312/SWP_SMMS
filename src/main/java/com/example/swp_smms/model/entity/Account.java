@@ -66,7 +66,12 @@ public class Account {
     @OneToMany(mappedBy = "student")
     @JsonIgnore
     private List<VaccinationRecord> vaccinationRecords;
-    
+
+    @OneToMany(mappedBy = "student")
+    @JsonIgnore
+    private List<StudentExternalVaccine> studentExternalVaccines;
+
+
     @OneToMany(mappedBy = "nurse")
     @JsonIgnore
     private List<VaccinationRecord> nurseVaccinationRecords;
@@ -106,7 +111,8 @@ public class Account {
     @OneToMany(mappedBy = "parent")
     @JsonIgnore
     private List<VaccinationConfirmation> parentVaccinationConfirmations;
-    
+
+
     @Column(name = "email_notifications_enabled")
     @JsonIgnore
     private Boolean emailNotificationsEnabled = true;

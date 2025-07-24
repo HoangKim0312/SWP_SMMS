@@ -19,8 +19,11 @@ public class StudentExternalVaccine {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "medical_profile_id", nullable = false)
-    private MedicalProfile medicalProfile;
+    @JoinColumn(name = "student_id", referencedColumnName = "account_id")
+    private Account student;
+    @ManyToOne
+    @JoinColumn(name = "submitted_by", referencedColumnName = "account_id")
+    private Account submitted_by; // id of parent or nurse
 
     @ManyToOne
     @JoinColumn(name = "vaccine_id", nullable = false)
@@ -35,8 +38,6 @@ public class StudentExternalVaccine {
     @Column(name = "note", columnDefinition = "TEXT")
     private String note;
 
-    @Column(name = "submitted_by")
-    private String submittedBy; // name of parent or nurse
 
     @Column(name = "verified")
     private boolean verified = false; // for nurse/admin to verify authenticity

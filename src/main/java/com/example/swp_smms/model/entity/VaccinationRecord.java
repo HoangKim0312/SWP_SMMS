@@ -29,10 +29,6 @@ public class VaccinationRecord {
     @JoinColumn(name = "vaccine_notice_id")
     private VaccinationNotice vaccinationNotice;
 
-    @ManyToOne
-    @JoinColumn(name = "vaccine_id")
-    private Vaccine vaccine;
-
     @Column(name = "results")
     private String results;
 
