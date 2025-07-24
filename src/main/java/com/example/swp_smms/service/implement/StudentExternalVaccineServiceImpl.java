@@ -37,6 +37,7 @@ public class StudentExternalVaccineServiceImpl implements StudentExternalVaccine
                 .location(entity.getLocation())
                 .note(entity.getNote())
                 .verified(entity.isVerified())
+                .vaccineId(entity.getVaccine().getVaccineId())
                 .build();
     }
     @Override
