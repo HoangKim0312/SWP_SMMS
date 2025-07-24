@@ -25,5 +25,9 @@ public class MedicationItem {
     private String medicationName;
 
     @Column(name = "amount", nullable = false)
-    private Integer amount; // e.g., 1 tablet
+    private Double amount; // e.g., 1 tablet
+
+    @Column(name = "unit", nullable = false)
+    private String unit; // e.g., viên, gram, mlg, ml
+
 }

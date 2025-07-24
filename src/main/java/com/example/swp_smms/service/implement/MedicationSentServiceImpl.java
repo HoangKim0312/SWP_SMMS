@@ -138,6 +138,7 @@ public class MedicationSentServiceImpl implements MedicationSentService {
                 item.setDosage(dosage);
                 item.setMedicationName(itemRequest.getMedicationName());
                 item.setAmount(itemRequest.getAmount());
+                item.setUnit(itemRequest.getUnit());
                 itemList.add(item);
             }
 
@@ -197,6 +198,7 @@ public class MedicationSentServiceImpl implements MedicationSentService {
                 item.setDosage(dosage);
                 item.setMedicationName(itemRequest.getMedicationName());
                 item.setAmount(itemRequest.getAmount());
+                item.setUnit(itemRequest.getUnit());
                 itemList.add(item);
             }
             dosage.setMedicationItems(itemList);
