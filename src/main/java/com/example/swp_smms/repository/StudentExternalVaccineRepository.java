@@ -8,5 +8,6 @@ import java.util.UUID;
 
 public interface StudentExternalVaccineRepository extends JpaRepository<StudentExternalVaccine, Long> {
     List<StudentExternalVaccine> findByStudent_AccountIdAndVerified(UUID studentId, boolean verified);
+    List<StudentExternalVaccine> findByVerifiedFalse();
 
 }

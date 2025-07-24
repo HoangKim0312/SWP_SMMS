@@ -12,5 +12,6 @@ public interface StudentExternalVaccineService {
 
     StudentExternalVaccineResponse verify(Long id);
     List<StudentExternalVaccineResponse> getExternalVaccinesByStudentAndVerifiedStatus(UUID studentId, boolean status);
+    List<StudentExternalVaccineResponse> getAllUnverified();
 
 }

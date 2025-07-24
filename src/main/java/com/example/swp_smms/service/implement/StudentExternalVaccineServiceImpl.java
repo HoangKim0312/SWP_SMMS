@@ -27,6 +27,18 @@ public class StudentExternalVaccineServiceImpl implements StudentExternalVaccine
 
     @Autowired
     private VaccineRepository vaccineRepository;
+
+    private StudentExternalVaccineResponse mapToResponse(StudentExternalVaccine entity) {
+        return StudentExternalVaccineResponse.builder()
+                .externalVaccineId(entity.getId())
+                .studentId(entity.getStudent().getAccountId())
+                .submittedBy(entity.getSubmitted_by().getAccountId())
+                .injectionDate(entity.getInjectionDate())
+                .location(entity.getLocation())
+                .note(entity.getNote())
+                .verified(entity.isVerified())
+                .build();
+    }
     @Override
     public StudentExternalVaccineResponse create(StudentExternalVaccineRequest request) {
         Account student = accountRepository.findById(request.getStudentId())
@@ -75,17 +87,14 @@ public class StudentExternalVaccineServiceImpl implements StudentExternalVaccine
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
-    private StudentExternalVaccineResponse mapToResponse(StudentExternalVaccine entity) {
-        return StudentExternalVaccineResponse.builder()
-                .externalVaccineId(entity.getId())
-                .studentId(entity.getStudent().getAccountId())
-                .submittedBy(entity.getSubmitted_by().getAccountId())
-                .injectionDate(entity.getInjectionDate())
-                .location(entity.getLocation())
-                .note(entity.getNote())
-                .verified(entity.isVerified())
-                .build();
-    }
 
+
+    @Override
+    public List<StudentExternalVaccineResponse> getAllUnverified() {
+        List<StudentExternalVaccine> unverifiedRecords = externalVaccineRepository.findByVerifiedFalse();
+        return unverifiedRecords.stream()
+                .map(this::mapToResponse) // reuse your existing mapper
+                .collect(Collectors.toList());
+    }
 
 }

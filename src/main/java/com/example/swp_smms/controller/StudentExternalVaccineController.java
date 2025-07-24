@@ -36,5 +36,10 @@ public class StudentExternalVaccineController {
                 .getExternalVaccinesByStudentAndVerifiedStatus(studentId, status);
         return ResponseEntity.ok(vaccines);
     }
+    @GetMapping("/unverified")
+    public ResponseEntity<List<StudentExternalVaccineResponse>> getAllUnverified() {
+        List<StudentExternalVaccineResponse> responses = externalVaccineService.getAllUnverified();
+        return ResponseEntity.ok(responses);
+    }
 
 }
