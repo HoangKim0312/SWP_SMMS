@@ -18,12 +18,6 @@ public interface MedicalProfileRepository extends JpaRepository<MedicalProfile, 
     boolean existsByStudent_AccountId(UUID accountId);
     Optional<MedicalProfile> findByStudent(Account student);
 
-    @Query("SELECT m FROM MedicalProfile m WHERE m.student.accountId = :studentId ORDER BY m.lastUpdated DESC")
-    List<MedicalProfile> findMedicalProfilesByStudentId(@Param("studentId") UUID studentId, Pageable pageable);
-
-    @Query("SELECT m FROM MedicalProfile m WHERE m.student.accountId = :studentId ORDER BY m.lastUpdated DESC")
-    List<MedicalProfile> findMedicalProfilesByStudentId(@Param("studentId") UUID studentId);
-
     @Modifying
     @Query("DELETE FROM MedicalProfile m WHERE m.student.accountId = :studentId AND m.medicalProfileId = :medicalProfileId")
     void deleteByStudentIdAndMedicalProfileId(@Param("studentId") UUID studentId,

@@ -24,4 +24,5 @@ public interface MedicalProfileService {
     StudentDisease updateStudentDisease(UpdateStudentDiseaseRequest request);
     StudentCondition updateStudentCondition(UpdateStudentConditionRequest request);
 
+    void updateBasicHealthData(StudentBasicHealthDataRequest request);
 }

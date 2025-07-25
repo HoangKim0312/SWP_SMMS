@@ -124,4 +124,10 @@ public class MedicalProfileController {
         return ResponseEntity.ok(updated);
     }
 
+    @PutMapping("/basic-health-data/update")
+    public ResponseEntity<String> updateBasicHealthData(@RequestBody StudentBasicHealthDataRequest request) {
+        medicalProfileService.updateBasicHealthData(request);
+        return ResponseEntity.ok("Student basic health data updated successfully.");
+    }
+
 }

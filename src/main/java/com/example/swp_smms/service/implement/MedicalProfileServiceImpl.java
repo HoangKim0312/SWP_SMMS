@@ -27,7 +27,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
     private final SyndromeDisabilityRepository syndromeDisabilityRepository;
     private final StudentConditionRepository studentConditionRepository;
     private final SnapshotService snapshotService;
-
+    private final StudentBasicHealthRepository studentBasicHealthRepository;
     private void takeSnapshotForProfile(MedicalProfile profile) {
         try {
             snapshotService.createSnapshot(profile.getMedicalProfileId());
@@ -263,6 +263,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         newAllergy.setLifeThreatening(request.isLifeThreatening());
         newAllergy.setActive(true);
         StudentAllergy savedAllergy = studentAllergyRepository.save(newAllergy);
+        profile.setLastUpdated(LocalDateTime.now());
         takeSnapshotForProfile(profile);
         return savedAllergy;
     }
@@ -288,6 +289,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         studentDisease.setActive(true);
 
         StudentDisease savedDisease = studentDiseaseRepository.save(studentDisease);
+        profile.setLastUpdated(LocalDateTime.now());
         takeSnapshotForProfile(profile);
         return savedDisease;
     }
@@ -312,6 +314,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         studentCondition.setActive(true);
 
         StudentCondition savedCondition = studentConditionRepository.save(studentCondition);
+        profile.setLastUpdated(LocalDateTime.now());
         takeSnapshotForProfile(profile);
         return savedCondition;
     }
@@ -323,6 +326,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
                 .orElseThrow(() -> new RuntimeException("StudentAllergy not found with ID: " + studentAllergyId));
         allergy.setActive(active);
         StudentAllergy saved = studentAllergyRepository.save(allergy);
+        allergy.getMedicalProfile().setLastUpdated(LocalDateTime.now());
         takeSnapshotForProfile(allergy.getMedicalProfile());
         return saved;
 
@@ -334,6 +338,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
                 .orElseThrow(() -> new RuntimeException("StudentDisease not found with ID: " + id));
         disease.setActive(active);
         StudentDisease saved = studentDiseaseRepository.save(disease);
+        disease.getMedicalProfile().setLastUpdated(LocalDateTime.now());
         takeSnapshotForProfile(disease.getMedicalProfile());
         return saved;
     }
@@ -344,6 +349,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
                 .orElseThrow(() -> new RuntimeException("StudentCondition not found with ID: " + id));
         condition.setActive(active);
         StudentCondition saved = studentConditionRepository.save(condition);
+        condition.getMedicalProfile().setLastUpdated(LocalDateTime.now());
         takeSnapshotForProfile(condition.getMedicalProfile());
         return saved;
 
@@ -359,6 +365,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         allergy.setLifeThreatening(request.isLifeThreatening());
 
         StudentAllergy saved = studentAllergyRepository.save(allergy);
+        allergy.getMedicalProfile().setLastUpdated(LocalDateTime.now());
         takeSnapshotForProfile(allergy.getMedicalProfile());
         return saved;
     }
@@ -368,6 +375,7 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
                 .orElseThrow(() -> new RuntimeException("StudentDisease not found with ID: " + request.getId()));
 
         disease.setSeverity(request.getSeverity());
+        disease.getMedicalProfile().setLastUpdated(LocalDateTime.now());
 
         StudentDisease saved = studentDiseaseRepository.save(disease);
         takeSnapshotForProfile(disease.getMedicalProfile());
@@ -378,11 +386,47 @@ public class MedicalProfileServiceImpl implements MedicalProfileService {
         StudentCondition condition = studentConditionRepository.findById(request.getId())
                 .orElseThrow(() -> new RuntimeException("StudentCondition not found with ID: " + request.getId()));
 
+
         condition.setNote(request.getNote());
 
         StudentCondition saved = studentConditionRepository.save(condition);
+        condition.getMedicalProfile().setLastUpdated(LocalDateTime.now());
+
         takeSnapshotForProfile(condition.getMedicalProfile());
         return saved;
+    }
+
+    @Override
+    public void updateBasicHealthData(StudentBasicHealthDataRequest request) {
+        // 1. Get student's medical profile
+        Account student = accountRepository.findById(request.getStudentId())
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        MedicalProfile profile = medicalProfileRepository.findByStudentAndActiveTrue(student)
+                .orElseThrow(() -> new RuntimeException("Medical profile not found"));
+
+        // 2. Get or create StudentBasicHealthData
+        StudentBasicHealthData healthData = studentBasicHealthRepository
+                .findByMedicalProfile(profile)
+                .orElse(new StudentBasicHealthData());
+
+        // 3. Update fields
+        healthData.setMedicalProfile(profile);
+        healthData.setHeightCm(request.getHeightCm());
+        healthData.setWeightKg(request.getWeightKg());
+        healthData.setVisionLeft(request.getVisionLeft());
+        healthData.setVisionRight(request.getVisionRight());
+        healthData.setHearingStatus(request.getHearingStatus());
+        healthData.setGender(request.getGender());
+        healthData.setBloodType(request.getBloodType());
+        healthData.setLastMeasured(LocalDateTime.now().toString());
+
+        //4. save new update time for profile
+        profile.setLastUpdated(LocalDateTime.now());
+
+        // 5. Save
+        studentBasicHealthRepository.save(healthData);
+        takeSnapshotForProfile(profile);
     }
 
 }
