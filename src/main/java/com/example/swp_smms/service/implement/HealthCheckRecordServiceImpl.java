@@ -3,11 +3,13 @@ package com.example.swp_smms.service.implement;
 import com.example.swp_smms.model.entity.Account;
 import com.example.swp_smms.model.entity.HealthCheckNotice;
 import com.example.swp_smms.model.entity.HealthCheckRecord;
+import com.example.swp_smms.model.entity.MedicalProfile;
 import com.example.swp_smms.model.payload.request.HealthCheckRecordRequest;
 import com.example.swp_smms.model.payload.response.HealthCheckRecordResponse;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.HealthCheckNoticeRepository;
 import com.example.swp_smms.repository.HealthCheckRecordRepository;
+import com.example.swp_smms.repository.MedicalProfileRepository;
 import com.example.swp_smms.service.HealthCheckRecordService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,9 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
     
     @Autowired
     private HealthCheckNoticeRepository healthCheckNoticeRepository;
+    
+    @Autowired
+    private MedicalProfileRepository medicalProfileRepository;
     
     @Autowired
     private ModelMapper modelMapper;
@@ -63,19 +68,35 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
         record.setStudent(student);
         record.setNurse(nurse);
         record.setHealthCheckNotice(notice);
-
         record.setResults(request.getResult());
+
+        // Link to latest medical profile
+        MedicalProfile medicalProfile = null;
+        java.util.List<MedicalProfile> profiles = medicalProfileRepository.findMedicalProfilesByStudentId(studentId);
+        if (!profiles.isEmpty()) {
+            medicalProfile = profiles.get(0); // Assuming the first is the latest due to ORDER BY lastUpdated DESC
+            record.setMedicalProfile(medicalProfile);
+            // Optionally update the medical profile with new health check info
+            medicalProfile.setRecordId(null); // or set to recordId after save if needed
+            medicalProfile.setLastUpdated(java.time.LocalDate.now().toString());
+            // You can update other fields as needed, e.g., medicalProfile.setPastTreatments(...)
+            medicalProfileRepository.save(medicalProfile);
+        }
 
         // Save to DB
         HealthCheckRecord savedRecord = healthCheckRecordRepository.save(record);
-        
+        // If you want to set the recordId in the medical profile after save
+        if (medicalProfile != null) {
+            medicalProfile.setRecordId(savedRecord.getRecordId());
+            medicalProfileRepository.save(medicalProfile);
+        }
         // Map to response
         HealthCheckRecordResponse response = modelMapper.map(savedRecord, HealthCheckRecordResponse.class);
         response.setRecordId(savedRecord.getRecordId());
         response.setStudentId(studentId);
         response.setNurseId(nurseId);
         response.setCheckNoticeId(request.getHealthCheckNoticeId());
-        
+        response.setMedicalProfileId(medicalProfile != null ? medicalProfile.getMedicalProfileId() : null);
         return response;
     }
 

@@ -12,6 +12,8 @@ public interface HealthCheckNoticeService {
     List<HealthCheckNoticeResponse> getAllNotices();
     List<HealthCheckNoticeResponse> getNoticesByDate(LocalDate date);
     List<HealthCheckNoticeResponse> getNoticesByTitle(String title);
+    List<HealthCheckNoticeResponse> getNoticesByGrade(Integer grade);
+    List<HealthCheckNoticeResponse> getNoticesByPriority(String priority);
     HealthCheckNoticeResponse updateNotice(Long checkNoticeId, HealthCheckNoticeRequest request);
     void deleteNotice(Long checkNoticeId);
 } 

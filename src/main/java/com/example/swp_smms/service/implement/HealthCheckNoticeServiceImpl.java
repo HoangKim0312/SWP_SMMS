@@ -42,8 +42,11 @@ public class HealthCheckNoticeServiceImpl implements HealthCheckNoticeService {
         }
         //Set tittle & desciption
         notice.setTitle(request.getTitle());
-
         notice.setDescription(request.getDescription());
+        // Set grade
+        notice.setGrade(request.getGrade());
+        // Set priority
+        notice.setPriority(request.getPriority());
         // Save to DB
         HealthCheckNotice savedNotice = healthCheckNoticeRepository.save(notice);
         
@@ -102,6 +105,30 @@ public class HealthCheckNoticeServiceImpl implements HealthCheckNoticeService {
     }
 
     @Override
+    public List<HealthCheckNoticeResponse> getNoticesByGrade(Integer grade) {
+        List<HealthCheckNotice> notices = healthCheckNoticeRepository.findByGrade(grade);
+        return notices.stream()
+                .map(notice -> {
+                    HealthCheckNoticeResponse response = modelMapper.map(notice, HealthCheckNoticeResponse.class);
+                    response.setCheckNoticeId(notice.getCheckNoticeId());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<HealthCheckNoticeResponse> getNoticesByPriority(String priority) {
+        List<HealthCheckNotice> notices = healthCheckNoticeRepository.findByPriority(priority);
+        return notices.stream()
+                .map(notice -> {
+                    HealthCheckNoticeResponse response = modelMapper.map(notice, HealthCheckNoticeResponse.class);
+                    response.setCheckNoticeId(notice.getCheckNoticeId());
+                    return response;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public HealthCheckNoticeResponse updateNotice(Long checkNoticeId, HealthCheckNoticeRequest request) {
         HealthCheckNotice notice = healthCheckNoticeRepository.findById(checkNoticeId)
                 .orElseThrow(() -> new RuntimeException("Health check notice not found with id: " + checkNoticeId));
@@ -116,6 +143,10 @@ public class HealthCheckNoticeServiceImpl implements HealthCheckNoticeService {
                 throw new RuntimeException("Invalid date format: " + request.getDate());
             }
         }
+        // Update grade
+        notice.setGrade(request.getGrade());
+        // Update priority
+        notice.setPriority(request.getPriority());
         HealthCheckNotice updatedNotice = healthCheckNoticeRepository.save(notice);
         
         HealthCheckNoticeResponse response = modelMapper.map(updatedNotice, HealthCheckNoticeResponse.class);

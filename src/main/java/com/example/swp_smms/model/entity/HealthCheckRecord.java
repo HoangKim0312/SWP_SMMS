@@ -29,6 +29,10 @@ public class HealthCheckRecord {
     @JoinColumn(name = "check_notice_id", referencedColumnName = "check_notice_id")
     private HealthCheckNotice healthCheckNotice;
 
+    @ManyToOne
+    @JoinColumn(name = "medical_profile_id", referencedColumnName = "medical_profile_id")
+    private MedicalProfile medicalProfile;
+
     @Column(name = "results")
     private String results;
 

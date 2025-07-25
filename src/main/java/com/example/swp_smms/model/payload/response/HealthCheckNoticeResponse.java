@@ -17,4 +17,6 @@ public class HealthCheckNoticeResponse {
     private String description;
     private LocalDate date;
     private LocalDateTime createdAt;
+    private Integer grade;
+    private String priority;
 } 

@@ -19,4 +19,5 @@ public class HealthCheckRecordResponse {
     private Long checkNoticeId;
     private String results;
     private LocalDate date;
+    private Long medicalProfileId;
 } 

@@ -28,6 +28,12 @@ public class HealthCheckNotice {
     @Column(name = "date")
     private LocalDate date;
 
+    @Column(name = "grade")
+    private Integer grade;
+
+    @Column(name = "priority")
+    private String priority;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 } 

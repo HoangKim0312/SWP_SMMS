@@ -50,6 +50,18 @@ public class HealthCheckNoticeController {
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Health check notices by title fetched successfully", response);
     }
 
+    @GetMapping("/getByGrade/{grade}")
+    public Object getNoticesByGrade(@PathVariable Integer grade) {
+        List<HealthCheckNoticeResponse> response = noticeService.getNoticesByGrade(grade);
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Health check notices by grade fetched successfully", response);
+    }
+
+    @GetMapping("/getByPriority/{priority}")
+    public Object getNoticesByPriority(@PathVariable String priority) {
+        List<HealthCheckNoticeResponse> response = noticeService.getNoticesByPriority(priority);
+        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Health check notices by priority fetched successfully", response);
+    }
+
     @PutMapping("/update/{id}")
     public Object updateNotice(@PathVariable Long id, @Valid @RequestBody HealthCheckNoticeRequest request) {
         HealthCheckNoticeResponse response = noticeService.updateNotice(id, request);

@@ -10,4 +10,6 @@ import java.time.LocalDate;
 public interface HealthCheckNoticeRepository extends JpaRepository<HealthCheckNotice, Long> {
     List<HealthCheckNotice> findByDate(LocalDate date);
     List<HealthCheckNotice> findByTitleContainingIgnoreCase(String title);
+    List<HealthCheckNotice> findByGrade(Integer grade);
+    List<HealthCheckNotice> findByPriority(String priority);
 } 

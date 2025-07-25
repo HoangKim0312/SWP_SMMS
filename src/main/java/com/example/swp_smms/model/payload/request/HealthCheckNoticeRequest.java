@@ -13,4 +13,10 @@ public class HealthCheckNoticeRequest {
 
     @NotBlank(message = "Notice date is required")
     private String date;
+
+    @NotBlank(message = "Priority is required")
+    private String priority;
+
+    @NotBlank(message = "Grade is required")
+    private Integer grade;
 }
