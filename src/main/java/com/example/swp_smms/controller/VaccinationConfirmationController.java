@@ -60,17 +60,15 @@ public class VaccinationConfirmationController {
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmations by status fetched successfully", response);
     }
 
-    @PutMapping("/{id}")
-    public Object updateConfirmation(@PathVariable Long id,
-                                     @Valid @RequestBody VaccinationConfirmationRequest request) {
-        VaccinationConfirmationResponse response = confirmationService.updateConfirmation(id, request);
+    @PutMapping("/update")
+    public Object updateConfirmation(@Valid @RequestBody VaccinationConfirmationRequest request) {
+        VaccinationConfirmationResponse response = confirmationService.updateConfirmation(request);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination confirmation updated successfully", response);
     }
 
-    @PutMapping("/{id}/status")
-    public Object updateStatusOnly(@PathVariable Long id,
-                                   @Valid @RequestBody VaccinationConfirmationStatusRequest request) {
-        VaccinationConfirmationResponse response = confirmationService.updateStatusOnly(id, request);
+    @PutMapping("/update-status-only")
+    public Object updateStatusOnly(@Valid @RequestBody VaccinationConfirmationStatusRequest request) {
+        VaccinationConfirmationResponse response = confirmationService.updateStatusOnly(request);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination status updated successfully", response);
     }
 
