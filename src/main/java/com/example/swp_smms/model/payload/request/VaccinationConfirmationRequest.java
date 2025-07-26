@@ -8,6 +8,10 @@ import java.util.UUID;
 
 @Data
 public class VaccinationConfirmationRequest {
+
+    @NotNull(message = "Vaccination confirmation ID is required")
+    private Long vaccinationConfirmationId;
+
     @NotNull(message = "Vaccination notice ID is required")
     private Long vaccineNoticeId;
 

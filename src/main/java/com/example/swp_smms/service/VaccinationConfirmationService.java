@@ -16,13 +16,13 @@ public interface VaccinationConfirmationService {
     List<VaccinationConfirmationResponse> getConfirmationsByParent(UUID parentId);
     List<VaccinationConfirmationResponse> getConfirmationsByNotice(Long vaccineNoticeId);
     List<VaccinationConfirmationResponse> getConfirmationsByStatus(String status);
-    VaccinationConfirmationResponse updateConfirmation(Long id, VaccinationConfirmationRequest request);
+    VaccinationConfirmationResponse updateConfirmation(VaccinationConfirmationRequest request);
     void deleteConfirmation(Long id);
     List<AccountResponse> getConfirmedStudentsByNotice(Long vaccineNoticeId);
     List<VaccinationConfirmationResponse> getConfirmationsByStatusAndParentId(String status, UUID parentId);
     List<VaccinationConfirmationResponse> confirmAllUpcomingNoticesForAllChildren(UUID parentId);
     int confirmAllPendingByParent(UUID parentId);
-    VaccinationConfirmationResponse updateStatusOnly(Long id, VaccinationConfirmationStatusRequest request);
+    VaccinationConfirmationResponse updateStatusOnly(VaccinationConfirmationStatusRequest request);
     NoticeStatisticalResponse getStatusCountsByNoticeId(Long noticeId);
 
 } 
