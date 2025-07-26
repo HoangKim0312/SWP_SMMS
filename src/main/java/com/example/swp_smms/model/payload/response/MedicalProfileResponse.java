@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MedicalProfileResponse {
     private Long medicalProfileId;
     private boolean isActive;
@@ -22,6 +25,9 @@ public class MedicalProfileResponse {
     private BasicHealthDataDTO basicHealthData;
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class AllergyDTO {
         private Long studentAllergyId;
         private Long allergenId;
@@ -32,6 +38,9 @@ public class MedicalProfileResponse {
     }
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class DiseaseDTO {
         private Long studentDiseaseId;
         private Long diseaseId;
@@ -41,6 +50,9 @@ public class MedicalProfileResponse {
     }
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ConditionDTO {
         private Long studentConditionId;
         private Long conditionId;
@@ -49,6 +61,9 @@ public class MedicalProfileResponse {
     }
 
     @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class BasicHealthDataDTO {
         private Long studentBasicHealthId;
         private Double heightCm;
