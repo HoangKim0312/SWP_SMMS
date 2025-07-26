@@ -77,9 +77,9 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
                 .collect(Collectors.toList());
     }
     @Override
-    public VaccinationConfirmationResponse updateConfirmation(Long id, VaccinationConfirmationRequest request) {
-        VaccinationConfirmation confirmation = confirmationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vaccination confirmation not found with id: " + id));
+    public VaccinationConfirmationResponse updateConfirmation(VaccinationConfirmationRequest request) {
+        VaccinationConfirmation confirmation = confirmationRepository.findById(request.getVaccinationConfirmationId())
+                .orElseThrow(() -> new RuntimeException("Vaccination confirmation not found with id: " + request.getVaccinationConfirmationId()));
 
         Account student = accountRepository.findById(request.getStudentId())
                 .orElseThrow(() -> new RuntimeException("Student not found with id: " + request.getStudentId()));
@@ -192,9 +192,9 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
     }
 
     @Override
-    public VaccinationConfirmationResponse updateStatusOnly(Long id, VaccinationConfirmationStatusRequest request) {
-        VaccinationConfirmation confirmation = confirmationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Vaccination confirmation not found with id: " + id));
+    public VaccinationConfirmationResponse updateStatusOnly(VaccinationConfirmationStatusRequest request) {
+        VaccinationConfirmation confirmation = confirmationRepository.findById(request.getVaccinationConfirmationId())
+                .orElseThrow(() -> new RuntimeException("Vaccination confirmation not found with id: " + request.getVaccinationConfirmationId()));
 
         String status = request.getStatus().toUpperCase();
 
