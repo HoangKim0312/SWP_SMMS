@@ -2,7 +2,7 @@ package com.example.swp_smms.model.payload.response;
 
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -16,4 +16,5 @@ public class HealthEventResponse {
     private String status;
     private UUID studentID;
     private UUID nurseID;
+    private List<HealthEventMedicationResponse> medications;
 }

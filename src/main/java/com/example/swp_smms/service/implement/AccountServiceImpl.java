@@ -178,6 +178,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public AccountResponse getAccountById(UUID accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        return modelMapper.map(account, AccountResponse.class);
+    }
+
+    @Override
 
     public List<ChildData> getChildDataByClassId(Long classId) {
         return accountRepository.findChildDataByClassId(classId);

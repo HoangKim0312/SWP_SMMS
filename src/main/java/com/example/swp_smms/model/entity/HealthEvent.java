@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -41,4 +43,7 @@ public class HealthEvent {
     
     @Column(name = "status")
     private String status;
+    
+    @OneToMany(mappedBy = "healthEvent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HealthEventMedication> medications;
 } 

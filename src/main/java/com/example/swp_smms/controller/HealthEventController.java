@@ -3,6 +3,7 @@ package com.example.swp_smms.controller;
 import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.HealthEventRequest;
 import com.example.swp_smms.model.payload.response.HealthEventResponse;
+import com.example.swp_smms.model.payload.response.HealthEventMedicationResponse;
 import com.example.swp_smms.service.HealthEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -73,6 +74,16 @@ public class HealthEventController {
         return ResponseBuilder.responseBuilder(
                 HttpStatus.OK,
                 "Health event deleted successfully"
+        );
+    }
+    
+    @GetMapping("/{eventId}/medications")
+    public ResponseEntity<Object> getMedicationsByHealthEvent(@PathVariable Long eventId) {
+        List<HealthEventMedicationResponse> medications = healthEventService.getMedicationsByHealthEvent(eventId);
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "Medications for health event retrieved successfully",
+                medications
         );
     }
 }
