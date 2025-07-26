@@ -1,6 +1,8 @@
 package com.example.swp_smms.service.implement;
 
 import com.example.swp_smms.model.entity.*;
+import com.example.swp_smms.model.payload.response.MedicalProfileResponse;
+import com.example.swp_smms.model.payload.response.MedicalProfileSnapshotResponse;
 import com.example.swp_smms.repository.*;
 import com.example.swp_smms.service.SnapshotService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -8,12 +10,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -146,6 +146,34 @@ public class SnapshotServiceImpl implements SnapshotService {
 //        snapshot.setMedicalProfile(null); // ← Do this before returning
         return snapshotRepository.save(snapshot);
     }
+
+    @Override
+    public Page<MedicalProfileSnapshotResponse> getSnapshotsByStudentId(UUID studentId, Pageable pageable) {
+        Page<MedicalProfileSnapshot> snapshots =
+                snapshotRepository.findAllByMedicalProfile_Student_AccountId(studentId, pageable);
+
+        return snapshots.map(snapshot -> {
+            MedicalProfileSnapshotResponse.SnapshotMedicalProfileDTO medicalProfileData = mapSnapshotData(snapshot);
+            return MedicalProfileSnapshotResponse.builder()
+                    .id(snapshot.getId())
+                    .medicalProfileId(snapshot.getMedicalProfile().getMedicalProfileId())
+                    .snapshotTime(snapshot.getSnapshotTime())
+                    .medicalProfileData(medicalProfileData)
+                    .build();
+        });
+    }
+
+    private MedicalProfileSnapshotResponse.SnapshotMedicalProfileDTO mapSnapshotData(MedicalProfileSnapshot snapshot) {
+        try {
+            return objectMapper.readValue(
+                    snapshot.getSnapshotData(),
+                    MedicalProfileSnapshotResponse.SnapshotMedicalProfileDTO.class
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to parse snapshot data for snapshot ID: " + snapshot.getId(), e);
+        }
+    }
+
 
 
 }
