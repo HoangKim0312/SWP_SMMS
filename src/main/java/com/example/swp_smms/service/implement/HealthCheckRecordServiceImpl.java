@@ -72,7 +72,7 @@ public class HealthCheckRecordServiceImpl implements HealthCheckRecordService {
 
         // Link to latest medical profile
         MedicalProfile medicalProfile = null;
-        java.util.List<MedicalProfile> profiles = medicalProfileRepository.findMedicalProfilesByStudentId(studentId);
+        java.util.List<MedicalProfile> profiles = medicalProfileRepository.kfindMedicalProfilesByStudentId(studentId);
         if (!profiles.isEmpty()) {
             medicalProfile = profiles.get(0); // Assuming the first is the latest due to ORDER BY lastUpdated DESC
             record.setMedicalProfile(medicalProfile);
