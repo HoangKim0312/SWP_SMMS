@@ -2,7 +2,8 @@ package com.example.swp_smms.model.payload.request;
 
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.util.List;
+
 @Data
 public class HealthEventRequest
 {
@@ -12,5 +13,5 @@ public class HealthEventRequest
     private String solution;
     private String note;
     private String status;
-
+    private List<HealthEventMedicationRequest> medications;
 }

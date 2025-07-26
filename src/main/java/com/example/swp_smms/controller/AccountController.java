@@ -106,6 +106,12 @@ public class AccountController {
         }
     }
 
+    @GetMapping("/getByID/{accountId}")
+    public ResponseEntity<AccountResponse> getAccountById(@PathVariable UUID accountId) {
+        AccountResponse response = accountService.getAccountById(accountId);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/students/child-data/by-class")
     public ResponseEntity<List<ChildData>> getChildDataByClass(@RequestParam Long classId) {
         List<ChildData> students = accountService.getChildDataByClassId(classId);
