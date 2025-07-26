@@ -2,8 +2,10 @@ package com.example.swp_smms.controller;
 
 import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.HealthEventRequest;
+import com.example.swp_smms.model.payload.request.HealthEventApprovalRequest;
 import com.example.swp_smms.model.payload.response.HealthEventResponse;
 import com.example.swp_smms.model.payload.response.HealthEventMedicationResponse;
+import com.example.swp_smms.model.payload.response.HealthEventApprovalResponse;
 import com.example.swp_smms.service.HealthEventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -53,6 +55,36 @@ public class HealthEventController {
                 HttpStatus.OK,
                 "Health events for date retrieved successfully",
                 events
+        );
+    }
+
+    @GetMapping("/priority/{priority}")
+    public ResponseEntity<Object> getHealthEventsByPriority(@PathVariable String priority) {
+        List<HealthEventResponse> events = healthEventService.getHealthEventsByPriority(priority);
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "Health events by priority retrieved successfully",
+                events
+        );
+    }
+
+    @GetMapping("/parent/{parentId}/pending-approval")
+    public ResponseEntity<Object> getHealthEventsPendingApproval(@PathVariable UUID parentId) {
+        List<HealthEventResponse> events = healthEventService.getHealthEventsPendingApproval(parentId);
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "Pending approval health events retrieved successfully",
+                events
+        );
+    }
+
+    @PutMapping("/approve")
+    public ResponseEntity<Object> approveHealthEvent(@RequestBody HealthEventApprovalRequest request) {
+        HealthEventApprovalResponse response = healthEventService.approveHealthEvent(request);
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "Health event approval processed successfully",
+                response
         );
     }
 

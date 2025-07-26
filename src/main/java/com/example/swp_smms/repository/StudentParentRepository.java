@@ -13,6 +13,7 @@ public interface StudentParentRepository extends JpaRepository<StudentParent, Lo
     boolean existsByStudent_AccountIdAndParent_AccountId(java.util.UUID studentId, java.util.UUID parentId);
     void deleteByStudent_AccountIdAndParent_AccountId(java.util.UUID studentId, java.util.UUID parentId);
     List<StudentParent> findByParent_AccountId(UUID parentId);
+    List<StudentParent> findByStudent_AccountId(UUID studentId);
 
     @Query("SELECT DISTINCT a.clazz.grade FROM StudentParent sp JOIN sp.student a WHERE sp.parent.accountId = :parentId")
     List<Integer> findChildrenGradesByParentId(@Param("parentId") UUID parentId);

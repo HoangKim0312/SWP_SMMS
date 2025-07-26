@@ -4,19 +4,30 @@ import com.example.swp_smms.model.entity.Account;
 import com.example.swp_smms.model.entity.HealthEvent;
 import com.example.swp_smms.model.entity.HealthEventMedication;
 import com.example.swp_smms.model.entity.Medication;
+import com.example.swp_smms.model.entity.StudentParent;
+import com.example.swp_smms.model.enums.HealthEventApprovalStatus;
+import com.example.swp_smms.model.enums.HealthEventPriority;
 import com.example.swp_smms.model.payload.request.HealthEventRequest;
 import com.example.swp_smms.model.payload.request.HealthEventMedicationRequest;
+import com.example.swp_smms.model.payload.request.HealthEventFollowUpRequest;
+import com.example.swp_smms.model.payload.request.HealthEventApprovalRequest;
 import com.example.swp_smms.model.payload.response.HealthEventResponse;
 import com.example.swp_smms.model.payload.response.HealthEventMedicationResponse;
+import com.example.swp_smms.model.payload.response.HealthEventApprovalResponse;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.HealthEventRepository;
 import com.example.swp_smms.repository.HealthEventMedicationRepository;
 import com.example.swp_smms.repository.MedicationRepository;
+import com.example.swp_smms.repository.StudentParentRepository;
 import com.example.swp_smms.service.HealthEventService;
+import com.example.swp_smms.service.HealthEventNotificationService;
+import com.example.swp_smms.service.HealthEventFollowUpService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -37,9 +48,19 @@ public class HealthEventServiceImpl implements HealthEventService {
     private MedicationRepository medicationRepository;
     
     @Autowired
+    private StudentParentRepository studentParentRepository;
+    
+    @Autowired
+    private HealthEventNotificationService notificationService;
+    
+    @Autowired
+    private HealthEventFollowUpService followUpService;
+    
+    @Autowired
     private ModelMapper modelMapper;
 
     @Override
+    @Transactional
     public HealthEventResponse createHealthEvent(UUID studentId, UUID nurseId, HealthEventRequest request) {
         // Validate student exists
         if (!accountRepository.existsByAccountIdAndRole_RoleId(studentId, 1L)) {
@@ -59,6 +80,24 @@ public class HealthEventServiceImpl implements HealthEventService {
         Account nurse = accountRepository.findAccountByAccountId(nurseId);
         event.setStudent(student);
         event.setNurse(nurse);
+        
+        // Set priority (default to MEDIUM if not provided)
+        if (event.getPriority() == null) {
+            event.setPriority(HealthEventPriority.MEDIUM);
+        }
+        
+        // Set approval status based on priority
+        if (event.getPriority().requiresParentApproval()) {
+            event.setParentApprovalStatus(HealthEventApprovalStatus.PENDING);
+        } else {
+            event.setParentApprovalStatus(HealthEventApprovalStatus.NOT_REQUIRED);
+        }
+        
+        // Set home care requirement
+        if (event.getRequiresHomeCare() == null) {
+            // Auto-determine based on priority and event type
+            event.setRequiresHomeCare(determineHomeCareRequirement(event));
+        }
         
         // Save health event first
         HealthEvent savedEvent = healthEventRepository.save(event);
@@ -86,14 +125,16 @@ public class HealthEventServiceImpl implements HealthEventService {
             }
         }
         
-        // Map to response
-        HealthEventResponse response = modelMapper.map(savedEvent, HealthEventResponse.class);
-        response.setEventId(savedEvent.getEventId());
-        response.setStudentID(studentId);
-        response.setNurseID(nurseId);
+        // Handle priority-based actions
+        handlePriorityBasedActions(savedEvent);
         
-        // Add medications to response
-        response.setMedications(getMedicationsByHealthEvent(savedEvent.getEventId()));
+        // Handle scenario-based follow-up creation
+        if (request.getFollowUp() != null || shouldCreateFollowUp(savedEvent)) {
+            createFollowUpForEvent(savedEvent, request.getFollowUp());
+        }
+        
+        // Map to response
+        HealthEventResponse response = mapToResponse(savedEvent);
         
         return response;
     }
@@ -207,5 +248,215 @@ public class HealthEventServiceImpl implements HealthEventService {
                     return response;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public HealthEventApprovalResponse approveHealthEvent(HealthEventApprovalRequest request) {
+        // Validate health event exists
+        HealthEvent healthEvent = healthEventRepository.findById(request.getEventId())
+                .orElseThrow(() -> new RuntimeException("Health event not found with id: " + request.getEventId()));
+        
+        // Validate parent exists
+        Account parent = accountRepository.findById(request.getParentId())
+                .orElseThrow(() -> new RuntimeException("Parent not found with id: " + request.getParentId()));
+        
+        // Validate parent is linked to the student
+        boolean isParentLinked = studentParentRepository.existsByStudent_AccountIdAndParent_AccountId(
+                healthEvent.getStudent().getAccountId(), request.getParentId());
+        
+        if (!isParentLinked) {
+            throw new RuntimeException("Parent is not linked to this student");
+        }
+        
+        // Update approval status
+        healthEvent.setParentApprovalStatus(request.getApprovalStatus());
+        healthEvent.setParentApprovalReason(request.getReason());
+        healthEvent.setParentApprovalDate(LocalDateTime.now());
+        healthEvent.setApprovedByParent(parent);
+        
+        // Save the updated health event
+        healthEventRepository.save(healthEvent);
+        
+        // Send approval confirmation email
+        notificationService.sendApprovalConfirmation(healthEvent, request.getParentId());
+        
+        // Create response
+        HealthEventApprovalResponse response = new HealthEventApprovalResponse();
+        response.setEventId(healthEvent.getEventId());
+        response.setParentId(request.getParentId());
+        response.setParentName(parent.getFullName());
+        response.setApprovalStatus(request.getApprovalStatus());
+        response.setReason(request.getReason());
+        response.setApprovalDate(healthEvent.getParentApprovalDate());
+        response.setStudentName(healthEvent.getStudent().getFullName());
+        response.setEventDescription(healthEvent.getDescription());
+        response.setMessage("Health event " + request.getApprovalStatus().getDisplayName().toLowerCase() + " successfully");
+        
+        return response;
+    }
+
+    @Override
+    public List<HealthEventResponse> getHealthEventsByPriority(String priority) {
+        try {
+            HealthEventPriority priorityEnum = HealthEventPriority.fromDisplayName(priority);
+            List<HealthEvent> events = healthEventRepository.findByPriority(priorityEnum);
+            return events.stream()
+                    .map(this::mapToResponse)
+                    .collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid priority: " + priority);
+        }
+    }
+
+    @Override
+    public List<HealthEventResponse> getHealthEventsPendingApproval(UUID parentId) {
+        // Get all students linked to this parent
+        List<StudentParent> studentParents = studentParentRepository.findByParent_AccountId(parentId);
+        List<UUID> studentIds = studentParents.stream()
+                .map(sp -> sp.getStudent().getAccountId())
+                .collect(Collectors.toList());
+        
+        if (studentIds.isEmpty()) {
+            return List.of();
+        }
+        
+        // Get health events for these students that are pending approval
+        List<HealthEvent> pendingEvents = healthEventRepository.findByStudent_AccountIdInAndParentApprovalStatus(
+                studentIds, HealthEventApprovalStatus.PENDING);
+        
+        return pendingEvents.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    private boolean determineHomeCareRequirement(HealthEvent event) {
+        // Logic to determine if home care is required based on priority and event type
+        if (event.getPriority() == HealthEventPriority.CRITICAL || event.getPriority() == HealthEventPriority.HIGH) {
+            return true;
+        }
+        
+        // Check event type for specific scenarios
+        String eventType = event.getEventType() != null ? event.getEventType().toLowerCase() : "";
+        String description = event.getDescription() != null ? event.getDescription().toLowerCase() : "";
+        
+        // Keywords that suggest home care is needed
+        String[] homeCareKeywords = {"fever", "vomiting", "diarrhea", "headache", "injury", "fall", "accident", "bleeding"};
+        
+        for (String keyword : homeCareKeywords) {
+            if (eventType.contains(keyword) || description.contains(keyword)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private boolean shouldCreateFollowUp(HealthEvent event) {
+        // Create follow-up if:
+        // 1. Priority is MEDIUM or higher
+        // 2. Requires home care
+        // 3. Has medications prescribed
+        return (event.getPriority().requiresParentApproval() || 
+                Boolean.TRUE.equals(event.getRequiresHomeCare()) ||
+                (event.getMedications() != null && !event.getMedications().isEmpty()));
+    }
+
+    private void createFollowUpForEvent(HealthEvent event, HealthEventFollowUpRequest followUpRequest) {
+        // Get parent for the student
+        List<StudentParent> studentParents = studentParentRepository.findByStudent_AccountId(event.getStudent().getAccountId());
+        
+        if (studentParents.isEmpty()) {
+            throw new RuntimeException("No parent found for student: " + event.getStudent().getFullName());
+        }
+        
+        // Use the first parent (you might want to implement logic to choose the primary parent)
+        StudentParent studentParent = studentParents.get(0);
+        
+        // Create follow-up request if not provided
+        if (followUpRequest == null) {
+            followUpRequest = new HealthEventFollowUpRequest();
+            followUpRequest.setEventId(event.getEventId());
+            followUpRequest.setParentId(studentParent.getParent().getAccountId());
+            followUpRequest.setInstruction(generateFollowUpInstruction(event));
+            followUpRequest.setRequiresDoctor(determineDoctorRequirement(event));
+            followUpRequest.setStatus("PENDING");
+        }
+        
+        // Create the follow-up
+        followUpService.createFollowUp(followUpRequest);
+    }
+
+    private String generateFollowUpInstruction(HealthEvent event) {
+        StringBuilder instruction = new StringBuilder();
+        
+        switch (event.getPriority()) {
+            case LOW:
+                instruction.append("Minor incident handled at school. Monitor for any changes.");
+                break;
+            case MEDIUM:
+                instruction.append("Please monitor your child's condition. Contact school if symptoms worsen.");
+                if (event.getMedications() != null && !event.getMedications().isEmpty()) {
+                    instruction.append(" Follow medication instructions provided by the nurse.");
+                }
+                break;
+            case HIGH:
+                instruction.append("URGENT: Please monitor your child closely. Consider consulting a doctor if symptoms persist.");
+                if (event.getMedications() != null && !event.getMedications().isEmpty()) {
+                    instruction.append(" Administer medications as prescribed by the nurse.");
+                }
+                break;
+            case CRITICAL:
+                instruction.append("EMERGENCY: Immediate medical attention may be required. Please consult a doctor immediately.");
+                break;
+        }
+        
+        if (event.getSolution() != null && !event.getSolution().isEmpty()) {
+            instruction.append(" Immediate action taken: ").append(event.getSolution());
+        }
+        
+        return instruction.toString();
+    }
+
+    private Boolean determineDoctorRequirement(HealthEvent event) {
+        return event.getPriority() == HealthEventPriority.CRITICAL || 
+               event.getPriority() == HealthEventPriority.HIGH;
+    }
+
+    private void handlePriorityBasedActions(HealthEvent event) {
+        // Get parent for the student
+        List<StudentParent> studentParents = studentParentRepository.findByStudent_AccountId(event.getStudent().getAccountId());
+        
+        if (studentParents.isEmpty()) {
+            throw new RuntimeException("No parent found for student: " + event.getStudent().getFullName());
+        }
+        
+        // Notify all parents
+        for (StudentParent studentParent : studentParents) {
+            UUID parentId = studentParent.getParent().getAccountId();
+            
+            // Send appropriate notification based on priority
+            if (event.getPriority().isEmergency()) {
+                notificationService.sendEmergencyNotification(event, parentId);
+            } else if (notificationService.shouldSendNotification(event.getPriority())) {
+                notificationService.notifyParent(event, parentId);
+            }
+        }
+    }
+
+    private HealthEventResponse mapToResponse(HealthEvent event) {
+        HealthEventResponse response = modelMapper.map(event, HealthEventResponse.class);
+        response.setEventId(event.getEventId());
+        response.setStudentID(event.getStudent().getAccountId());
+        response.setNurseID(event.getNurse().getAccountId());
+        response.setApprovedByParentID(event.getApprovedByParent() != null ? event.getApprovedByParent().getAccountId() : null);
+        response.setApprovedByParentName(event.getApprovedByParent() != null ? event.getApprovedByParent().getFullName() : null);
+        
+        // Add medications to response
+        response.setMedications(getMedicationsByHealthEvent(event.getEventId()));
+        
+        // Add follow-ups to response
+        response.setFollowUps(followUpService.getFollowUpsByEvent(event.getEventId()));
+        
+        return response;
     }
 }
