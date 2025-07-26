@@ -16,7 +16,7 @@ public interface VaccinationConfirmationRepository extends JpaRepository<Vaccina
     List<VaccinationConfirmation> findByParent_AccountId(UUID parentId);
     List<VaccinationConfirmation> findByVaccinationNotice_VaccineNoticeId(Long vaccineNoticeId);
     List<VaccinationConfirmation> findByStatus(String status);
-    List<VaccinationConfirmation> findByStatusAndParent_AccountId(String status, UUID parentId);
+
     long countByVaccinationNotice_VaccineNoticeId(Long noticeId);
 
 
@@ -36,5 +36,14 @@ public interface VaccinationConfirmationRepository extends JpaRepository<Vaccina
 
     @Query("SELECT COUNT(vc) FROM VaccinationConfirmation vc WHERE vc.vaccinationNotice.vaccineNoticeId = :noticeId")
     long countByVaccinationNoticeId(@Param("noticeId") Long noticeId);
+
+
+    // New method: get confirmations by student and status
+    @Query("SELECT vc FROM VaccinationConfirmation vc " +
+            "WHERE vc.status = :status AND vc.student.accountId IN (" +
+            "SELECT sp.student.accountId FROM StudentParent sp WHERE sp.parent.accountId = :parentId)")
+    List<VaccinationConfirmation> findByStatusAndParentLinkedStudents(@Param("status") String status,
+                                                                      @Param("parentId") UUID parentId);
+
 
 } 

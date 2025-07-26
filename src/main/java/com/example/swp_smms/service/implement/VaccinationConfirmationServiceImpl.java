@@ -111,10 +111,11 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
 
     @Override
     public List<VaccinationConfirmationResponse> getConfirmationsByStatusAndParentId(String status, UUID parentId) {
-        return confirmationRepository.findByStatusAndParent_AccountId(status, parentId).stream()
+        return confirmationRepository.findByStatusAndParentLinkedStudents(status, parentId).stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
+
 
 
     @Override
@@ -247,16 +248,18 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
 
 
     private VaccinationConfirmationResponse mapToResponse(VaccinationConfirmation confirmation) {
+        Account parent = confirmation.getParent();
         return VaccinationConfirmationResponse.builder()
                 .confirmationId(confirmation.getConfirmationId())
                 .vaccineNoticeId(confirmation.getVaccinationNotice().getVaccineNoticeId())
                 .vaccineName(confirmation.getVaccinationNotice().getVaccineName())
                 .studentId(confirmation.getStudent().getAccountId())
                 .studentName(confirmation.getStudent().getFullName())
-                .parentId(confirmation.getParent().getAccountId())
-                .parentName(confirmation.getParent().getFullName())
+                .parentId(parent != null ? parent.getAccountId() : null)
+                .parentName(parent != null ? parent.getFullName() : null)
                 .status(confirmation.getStatus())
                 .confirmedAt(confirmation.getConfirmedAt())
                 .build();
     }
+
 } 
