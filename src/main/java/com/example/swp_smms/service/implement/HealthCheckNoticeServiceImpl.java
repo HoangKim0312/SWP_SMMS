@@ -4,6 +4,8 @@ import com.example.swp_smms.model.entity.HealthCheckNotice;
 import com.example.swp_smms.model.payload.request.HealthCheckNoticeRequest;
 import com.example.swp_smms.model.payload.response.HealthCheckNoticeResponse;
 import com.example.swp_smms.repository.HealthCheckNoticeRepository;
+import com.example.swp_smms.repository.AccountRepository;
+import com.example.swp_smms.repository.HealthCheckConfirmationRepository;
 import com.example.swp_smms.service.HealthCheckNoticeService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +16,20 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.example.swp_smms.model.entity.Account;
+import com.example.swp_smms.model.entity.HealthCheckConfirmation;
+import com.example.swp_smms.model.entity.StudentParent;
 
 @Service
 public class HealthCheckNoticeServiceImpl implements HealthCheckNoticeService {
     
     @Autowired
     private HealthCheckNoticeRepository healthCheckNoticeRepository;
+    
+    @Autowired
+    private AccountRepository accountRepository;
+    @Autowired
+    private HealthCheckConfirmationRepository healthCheckConfirmationRepository;
     
     @Autowired
     private ModelMapper modelMapper;
@@ -49,6 +59,25 @@ public class HealthCheckNoticeServiceImpl implements HealthCheckNoticeService {
         notice.setPriority(request.getPriority());
         // Save to DB
         HealthCheckNotice savedNotice = healthCheckNoticeRepository.save(notice);
+
+        // Notify students whose class grade matches the notice's grade
+        int noticeGrade = savedNotice.getGrade();
+        List<Account> students = accountRepository.findAll().stream()
+            .filter(account -> account.getRole() != null && account.getRole().getRoleId() == 1) // 1 = Student
+            .filter(account -> account.getClazz() != null && account.getClazz().getGrade() == noticeGrade)
+            .toList();
+        for (Account student : students) {
+            List<StudentParent> links = student.getStudentParents();
+            for (StudentParent sp : links) {
+                HealthCheckConfirmation confirmation = new HealthCheckConfirmation();
+                confirmation.setHealthCheckNotice(savedNotice);
+                confirmation.setStudent(student);
+                confirmation.setParent(sp.getParent());
+                confirmation.setStatus("PENDING");
+                confirmation.setConfirmedAt(null);
+                healthCheckConfirmationRepository.save(confirmation);
+            }
+        }
         
         // Map to response
         HealthCheckNoticeResponse response = modelMapper.map(savedNotice, HealthCheckNoticeResponse.class);
