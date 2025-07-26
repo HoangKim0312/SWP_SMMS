@@ -26,4 +26,16 @@ public class ResponseBuilder {
         response.put("data", data);
         return ResponseEntity.status(httpStatus).body(response);
     }
+
+
+    public static ResponseEntity<Object> success(Object data) {
+        return ResponseEntity.ok(data);
+    }
+
+    public static ResponseEntity<Object> error(String message, HttpStatus status) {
+        return ResponseEntity.status(status).body(new ErrorResponse(message));
+    }
+
+    private record ErrorResponse(String message) {}
+
 } 

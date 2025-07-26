@@ -24,10 +24,9 @@ public class VaccinationNoticeController {
 
     @PostMapping
     public ResponseEntity<VaccinationNoticeResponse> createNotice(
-            @RequestBody @Valid VaccinationNoticeRequest request,
-            @RequestParam Long vaccineBatchId
+            @RequestBody @Valid VaccinationNoticeRequest request
     ) {
-        VaccinationNoticeResponse created = noticeService.createNotice(request, vaccineBatchId);
+        VaccinationNoticeResponse created = noticeService.createNotice(request);
         return ResponseEntity.ok(created);
     }
 
@@ -47,18 +46,6 @@ public class VaccinationNoticeController {
     public Object searchNotices(@RequestParam String vaccineName) {
         List<VaccinationNoticeResponse> response = noticeService.searchNoticesByVaccineName(vaccineName);
         return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination notices fetched successfully", response);
-    }
-
-    @PutMapping("/{id}")
-    public Object updateNotice(@PathVariable Long id, @Valid @RequestBody VaccinationNoticeRequest request) {
-        VaccinationNoticeResponse response = noticeService.updateNotice(id, request);
-        return ResponseBuilder.responseBuilderWithData(HttpStatus.OK, "Vaccination notice updated successfully", response);
-    }
-
-    @DeleteMapping("/{id}")
-    public Object deleteNotice(@PathVariable Long id) {
-        noticeService.deleteNotice(id);
-        return ResponseBuilder.responseBuilder(HttpStatus.OK, "Vaccination notice deleted successfully");
     }
 
     @GetMapping("/today")

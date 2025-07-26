@@ -1,13 +1,12 @@
 package com.example.swp_smms.service.implement;
 
 import com.example.swp_smms.model.entity.Account;
+import com.example.swp_smms.model.entity.MedicalProfile;
 import com.example.swp_smms.model.entity.Role;
+import com.example.swp_smms.model.payload.request.AccountFilterRequest;
 import com.example.swp_smms.model.payload.request.AccountRequest;
 import com.example.swp_smms.model.payload.request.AccountUpdateRequest;
-import com.example.swp_smms.model.payload.response.AccountResponse;
-import com.example.swp_smms.model.payload.response.ChildData;
-import com.example.swp_smms.model.payload.response.GetChildResponse;
-import com.example.swp_smms.model.payload.response.PagedAccountResponse;
+import com.example.swp_smms.model.payload.response.*;
 import com.example.swp_smms.repository.AccountRepository;
 import com.example.swp_smms.repository.RoleRepository;
 import com.example.swp_smms.service.AccountService;
@@ -183,6 +182,30 @@ public class AccountServiceImpl implements AccountService {
         return accountRepository.findChildDataByClassId(classId);
     }
 
+    @Override
+    public StudentMedicalSummaryResponse getStudentMedicalSummary(UUID studentId) {
+        Account student = accountRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
 
+        MedicalProfile profile = student.getMedicalProfile();
+        if (profile == null || profile.getBasicHealthData() == null) {
+            throw new RuntimeException("Medical profile or basic health data not found");
+        }
+
+        StudentMedicalSummaryResponse response = new StudentMedicalSummaryResponse();
+        response.setClassId(student.getClazz().getClassId());
+        response.setClassName(student.getClazz().getClassName());
+        response.setGrade(student.getClazz().getGrade());
+        response.setFullName(student.getFullName());
+        response.setDob(student.getDob());
+        response.setGender(profile.getBasicHealthData().getGender());
+        return response;
+    }
+
+
+    @Override
+    public Page<AccountResponse> filterAccounts(AccountFilterRequest request) {
+        return accountRepository.filterStudents(request);
+    }
 
 }

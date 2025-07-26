@@ -6,9 +6,6 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import com.example.swp_smms.repository.AccountRepository;
-import com.example.swp_smms.repository.VaccinationConfirmationRepository;
-import com.example.swp_smms.model.entity.VaccinationConfirmation;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +17,8 @@ public interface VaccinationConfirmationRepository extends JpaRepository<Vaccina
     List<VaccinationConfirmation> findByVaccinationNotice_VaccineNoticeId(Long vaccineNoticeId);
     List<VaccinationConfirmation> findByStatus(String status);
     List<VaccinationConfirmation> findByStatusAndParent_AccountId(String status, UUID parentId);
+    long countByVaccinationNotice_VaccineNoticeId(Long noticeId);
+
 
     @Modifying
     @Query("UPDATE VaccinationConfirmation vc SET vc.status = 'CONFIRMED', " +
@@ -33,5 +32,9 @@ public interface VaccinationConfirmationRepository extends JpaRepository<Vaccina
             "WHERE vc.vaccinationNotice.vaccineNoticeId = :noticeId " +
             "GROUP BY vc.status")
     List<Object[]> countByStatusForNotice(@Param("noticeId") Long noticeId);
+
+
+    @Query("SELECT COUNT(vc) FROM VaccinationConfirmation vc WHERE vc.vaccinationNotice.vaccineNoticeId = :noticeId")
+    long countByVaccinationNoticeId(@Param("noticeId") Long noticeId);
 
 } 

@@ -15,4 +15,5 @@ public interface VaccinationNoticeRepository extends JpaRepository<VaccinationNo
 
     List<VaccinationNotice> findByGradeInAndVaccinationDateAfter(List<Integer> grades, LocalDate date);
 
+
 } 

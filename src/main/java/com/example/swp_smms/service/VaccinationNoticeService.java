@@ -9,12 +9,10 @@ import java.util.List;
 import java.util.UUID;
 
 public interface VaccinationNoticeService {
-    VaccinationNoticeResponse createNotice(VaccinationNoticeRequest request, Long vaccineBatchId);
+    VaccinationNoticeResponse createNotice(VaccinationNoticeRequest request);
     VaccinationNoticeResponse getNoticeById(Long id);
     List<VaccinationNoticeResponse> getAllNotices();
     List<VaccinationNoticeResponse> searchNoticesByVaccineName(String vaccineName);
-    VaccinationNoticeResponse updateNotice(Long id, VaccinationNoticeRequest request);
-    void deleteNotice(Long id);
     List<VaccinationNoticeResponse> getNoticesForToday();
     List<VaccinationNoticeResponse> getActiveNotices();
     List<VaccinationNoticeResponse> getActiveNoticesByParent(UUID parentId);
