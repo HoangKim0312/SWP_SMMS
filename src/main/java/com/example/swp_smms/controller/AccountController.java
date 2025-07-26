@@ -1,5 +1,6 @@
 package com.example.swp_smms.controller;
 
+import com.example.swp_smms.model.payload.request.AccountFilterRequest;
 import com.example.swp_smms.model.payload.request.AccountRequest;
 import com.example.swp_smms.model.payload.request.AccountUpdateRequest;
 import com.example.swp_smms.model.payload.response.AccountResponse;
@@ -10,6 +11,7 @@ import com.example.swp_smms.service.AccountService;
 import com.example.swp_smms.service.DataInitializationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -116,5 +118,9 @@ public class AccountController {
         return ResponseEntity.ok(students);
     }
 
+    @PostMapping("/filter")
+    public ResponseEntity<Page<AccountResponse>> filterAccounts(@RequestBody AccountFilterRequest request) {
+        return ResponseEntity.ok(accountService.filterAccounts(request));
+    }
 
 }

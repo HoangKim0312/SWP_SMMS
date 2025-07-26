@@ -1,15 +1,19 @@
 package com.example.swp_smms.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table(name = "MedicalProfile")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "medical_profile")
 public class MedicalProfile {
 
     @Id
@@ -17,39 +21,30 @@ public class MedicalProfile {
     @Column(name = "medical_profile_id")
     private Long medicalProfileId;
 
-    @ManyToOne
-    @JoinColumn(name = "student_id", referencedColumnName = "account_id")
+    @OneToOne
+    @JoinColumn(name = "student_id", referencedColumnName = "account_id", nullable = false, unique = true)
+    @JsonIgnore
     private Account student;
 
-    @Column(name = "record_id")
-    private Long recordId;
-
-    @Column(name = "allergies")
-    private String allergies;
-
-    @Column(name = "chronic_diseases")
-    private String chronicDiseases;
-
-    @Column(name = "past_treatments")
-    private String pastTreatments;
-
-    @Column(name = "vision_status_left")
-    private String visionStatusLeft;
-
-    @Column(name = "vision_status_right")
-    private String visionStatusRight;
-
-    @Column(name = "hearing_status")
-    private String hearingStatus;
-
-    @Column(name = "immunization_status")
-    private String immunizationStatus;
-
-
     @Column(name = "is_active")
-    private boolean isActive = true; // Default to true
+    private boolean active = true;
 
-    //yyyy-MM-dd
     @Column(name = "last_updated")
-    private String lastUpdated;
+    private LocalDateTime lastUpdated;
+
+    @OneToMany(mappedBy = "medicalProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentAllergy> allergies;
+
+    @OneToMany(mappedBy = "medicalProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentDisease> diseases;
+
+    @OneToMany(mappedBy = "medicalProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentCondition> conditions;
+
+    @OneToOne(mappedBy = "medicalProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    private StudentBasicHealthData basicHealthData;
+
+    @OneToMany(mappedBy = "medicalProfile", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<MedicalProfileSnapshot> historySnapshots;
 }

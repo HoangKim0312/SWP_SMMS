@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class MedicationItemResponse {
     private String medicationName;
-    private Integer amount;
+    private Double amount;
+    private String unit;
 }

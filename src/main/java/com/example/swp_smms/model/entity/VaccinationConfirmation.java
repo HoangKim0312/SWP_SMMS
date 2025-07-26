@@ -26,7 +26,7 @@ public class VaccinationConfirmation {
 
     @ManyToOne
     @JoinColumn(name = "parent_id", referencedColumnName = "account_id")
-    private Account parent;
+    private Account parent = null;
 
     @Column(name = "status")
     private String status;
