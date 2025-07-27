@@ -16,4 +16,5 @@ public interface HealthEventRepository extends JpaRepository<HealthEvent, Long> 
     List<HealthEvent> findByEventDate(String eventDate);
     List<HealthEvent> findByPriority(HealthEventPriority priority);
     List<HealthEvent> findByStudent_AccountIdInAndParentApprovalStatus(List<UUID> studentIds, HealthEventApprovalStatus approvalStatus);
+    List<HealthEvent> findByNurse_AccountId(UUID nurseId);
 }

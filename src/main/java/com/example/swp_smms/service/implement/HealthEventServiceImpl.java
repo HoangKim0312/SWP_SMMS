@@ -329,6 +329,21 @@ public class HealthEventServiceImpl implements HealthEventService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<HealthEventResponse> getHealthEventsByNurseId(UUID nurseId) {
+        // Validate nurse exists
+        if (!accountRepository.existsByAccountIdAndRole_RoleId(nurseId, 3L)) {
+            throw new RuntimeException("Nurse not exists or not a nurse");
+        }
+        
+        // Get all health events by nurse ID
+        List<HealthEvent> events = healthEventRepository.findByNurse_AccountId(nurseId);
+        
+        return events.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
     private boolean determineHomeCareRequirement(HealthEvent event) {
         // Logic to determine if home care is required based on priority and event type
         if (event.getPriority() == HealthEventPriority.CRITICAL || event.getPriority() == HealthEventPriority.HIGH) {

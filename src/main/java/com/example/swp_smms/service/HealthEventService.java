@@ -19,4 +19,5 @@ public interface HealthEventService {
     HealthEventApprovalResponse approveHealthEvent(HealthEventApprovalRequest request);
     List<HealthEventResponse> getHealthEventsByPriority(String priority);
     List<HealthEventResponse> getHealthEventsPendingApproval(UUID parentId);
+    List<HealthEventResponse> getHealthEventsByNurseId(UUID nurseId);
 }
