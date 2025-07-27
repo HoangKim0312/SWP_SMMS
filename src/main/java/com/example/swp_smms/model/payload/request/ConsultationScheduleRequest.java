@@ -10,7 +10,7 @@ import java.util.UUID;
 public class ConsultationScheduleRequest {
     private UUID studentId;
     private UUID parentId;
-    private UUID staffId;
+    private UUID nurseId;
     private Long healthCheckRecordId;
     private LocalDate scheduledDate;
     private ConsultationSlot slot;

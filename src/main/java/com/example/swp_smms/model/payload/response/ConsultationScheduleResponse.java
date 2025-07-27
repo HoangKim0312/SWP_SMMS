@@ -11,7 +11,7 @@ public class ConsultationScheduleResponse {
     private Long consultationId;
     private UUID studentId;
     private UUID parentId;
-    private UUID staffId;
+    private UUID nurseId;
     private Long healthCheckRecordId;
     private LocalDate scheduledDate;
     private ConsultationSlot slot;

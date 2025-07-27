@@ -11,11 +11,11 @@ import java.util.UUID;
 
 @Repository
 public interface ConsultationScheduleRepository extends JpaRepository<ConsultationSchedule, Long> {
-    List<ConsultationSchedule> findByStaff_AccountIdAndScheduledDate(UUID staffId, LocalDate scheduledDate);
-    List<ConsultationSchedule> findByStaff_AccountIdAndScheduledDateAndSlot(UUID staffId, LocalDate scheduledDate, ConsultationSlot slot);
+    List<ConsultationSchedule> findByNurse_AccountIdAndScheduledDate(UUID nurseId, LocalDate scheduledDate);
+    List<ConsultationSchedule> findByNurse_AccountIdAndScheduledDateAndSlot(UUID nurseId, LocalDate scheduledDate, ConsultationSlot slot);
     List<ConsultationSchedule> findByScheduledDateOrderByScheduledDateAsc(LocalDate scheduledDate);
     List<ConsultationSchedule> findByScheduledDateOrderByScheduledDateDesc(LocalDate scheduledDate);
-    List<ConsultationSchedule> findByStaff_AccountId(UUID staffId);
+    List<ConsultationSchedule> findByNurse_AccountId(UUID nurseId);
     List<ConsultationSchedule> findByStudent_AccountId(UUID studentId);
     List<ConsultationSchedule> findByParent_AccountId(UUID parentId);
 } 
