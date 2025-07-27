@@ -3,6 +3,7 @@ package com.example.swp_smms.controller;
 import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.HealthEventRequest;
 import com.example.swp_smms.model.payload.request.HealthEventApprovalRequest;
+import com.example.swp_smms.model.payload.request.HealthEventSearchRequest;
 import com.example.swp_smms.model.payload.response.HealthEventResponse;
 import com.example.swp_smms.model.payload.response.HealthEventMedicationResponse;
 import com.example.swp_smms.model.payload.response.HealthEventApprovalResponse;
@@ -125,6 +126,16 @@ public class HealthEventController {
         return ResponseBuilder.responseBuilderWithData(
                 HttpStatus.OK,
                 "Health events for nurse retrieved successfully",
+                events
+        );
+    }
+
+    @PostMapping("/search")
+    public ResponseEntity<Object> searchHealthEvents(@RequestBody HealthEventSearchRequest searchRequest) {
+        List<HealthEventResponse> events = healthEventService.searchHealthEvents(searchRequest);
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "Health events search completed successfully",
                 events
         );
     }

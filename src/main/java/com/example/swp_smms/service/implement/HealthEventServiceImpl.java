@@ -11,6 +11,7 @@ import com.example.swp_smms.model.payload.request.HealthEventRequest;
 import com.example.swp_smms.model.payload.request.HealthEventMedicationRequest;
 import com.example.swp_smms.model.payload.request.HealthEventFollowUpRequest;
 import com.example.swp_smms.model.payload.request.HealthEventApprovalRequest;
+import com.example.swp_smms.model.payload.request.HealthEventSearchRequest;
 import com.example.swp_smms.model.payload.response.HealthEventResponse;
 import com.example.swp_smms.model.payload.response.HealthEventMedicationResponse;
 import com.example.swp_smms.model.payload.response.HealthEventApprovalResponse;
@@ -356,6 +357,193 @@ public class HealthEventServiceImpl implements HealthEventService {
         return events.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<HealthEventResponse> searchHealthEvents(HealthEventSearchRequest searchRequest) {
+        // Get all health events first
+        List<HealthEvent> allEvents = healthEventRepository.findAll();
+        
+        // Apply filters
+        List<HealthEvent> filteredEvents = allEvents.stream()
+                .filter(event -> applySearchFilters(event, searchRequest))
+                .collect(Collectors.toList());
+        
+        // Apply sorting
+        List<HealthEvent> sortedEvents = applySorting(filteredEvents, searchRequest);
+        
+        // Apply pagination
+        List<HealthEvent> paginatedEvents = applyPagination(sortedEvents, searchRequest);
+        
+        return paginatedEvents.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    private boolean applySearchFilters(HealthEvent event, HealthEventSearchRequest searchRequest) {
+        // Search term filter
+        if (searchRequest.getSearchTerm() != null && !searchRequest.getSearchTerm().trim().isEmpty()) {
+            String searchTerm = searchRequest.getSearchTerm().toLowerCase();
+            String eventType = event.getEventType() != null ? event.getEventType().toLowerCase() : "";
+            String description = event.getDescription() != null ? event.getDescription().toLowerCase() : "";
+            String solution = event.getSolution() != null ? event.getSolution().toLowerCase() : "";
+            String note = event.getNote() != null ? event.getNote().toLowerCase() : "";
+            
+            if (!eventType.contains(searchTerm) && 
+                !description.contains(searchTerm) && 
+                !solution.contains(searchTerm) && 
+                !note.contains(searchTerm)) {
+                return false;
+            }
+        }
+        
+        // Event type filter
+        if (searchRequest.getEventType() != null && !searchRequest.getEventType().trim().isEmpty()) {
+            if (!searchRequest.getEventType().equalsIgnoreCase(event.getEventType())) {
+                return false;
+            }
+        }
+        
+        // Event date filter
+        if (searchRequest.getEventDate() != null && !searchRequest.getEventDate().trim().isEmpty()) {
+            if (!searchRequest.getEventDate().equals(event.getEventDate())) {
+                return false;
+            }
+        }
+        
+        // Priority filter
+        if (searchRequest.getPriority() != null) {
+            if (searchRequest.getPriority() != event.getPriority()) {
+                return false;
+            }
+        }
+        
+        // Approval status filter
+        if (searchRequest.getApprovalStatus() != null) {
+            if (searchRequest.getApprovalStatus() != event.getParentApprovalStatus()) {
+                return false;
+            }
+        }
+        
+        // Status filter
+        if (searchRequest.getStatus() != null && !searchRequest.getStatus().trim().isEmpty()) {
+            if (!searchRequest.getStatus().equalsIgnoreCase(event.getStatus())) {
+                return false;
+            }
+        }
+        
+        // Requires home care filter
+        if (searchRequest.getRequiresHomeCare() != null) {
+            if (!searchRequest.getRequiresHomeCare().equals(event.getRequiresHomeCare())) {
+                return false;
+            }
+        }
+        
+        // Student ID filter
+        if (searchRequest.getStudentId() != null) {
+            if (!searchRequest.getStudentId().equals(event.getStudent().getAccountId())) {
+                return false;
+            }
+        }
+        
+        // Nurse ID filter
+        if (searchRequest.getNurseId() != null) {
+            if (!searchRequest.getNurseId().equals(event.getNurse().getAccountId())) {
+                return false;
+            }
+        }
+        
+        // Parent ID filter (check if parent is linked to the student)
+        if (searchRequest.getParentId() != null) {
+            boolean isParentLinked = studentParentRepository.existsByStudent_AccountIdAndParent_AccountId(
+                    event.getStudent().getAccountId(), searchRequest.getParentId());
+            if (!isParentLinked) {
+                return false;
+            }
+        }
+        
+        // Date range filter
+        if (searchRequest.getStartDate() != null && !searchRequest.getStartDate().trim().isEmpty()) {
+            if (event.getEventDate().compareTo(searchRequest.getStartDate()) < 0) {
+                return false;
+            }
+        }
+        
+        if (searchRequest.getEndDate() != null && !searchRequest.getEndDate().trim().isEmpty()) {
+            if (event.getEventDate().compareTo(searchRequest.getEndDate()) > 0) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+
+    private List<HealthEvent> applySorting(List<HealthEvent> events, HealthEventSearchRequest searchRequest) {
+        String sortBy = searchRequest.getSortBy() != null ? searchRequest.getSortBy() : "createdAt";
+        String sortDirection = searchRequest.getSortDirection() != null ? searchRequest.getSortDirection() : "desc";
+        
+        return events.stream()
+                .sorted((e1, e2) -> {
+                    int comparison = 0;
+                    
+                    switch (sortBy.toLowerCase()) {
+                        case "eventid":
+                            comparison = e1.getEventId().compareTo(e2.getEventId());
+                            break;
+                        case "eventdate":
+                            comparison = e1.getEventDate().compareTo(e2.getEventDate());
+                            break;
+                        case "eventtype":
+                            comparison = (e1.getEventType() != null ? e1.getEventType() : "").compareTo(e2.getEventType() != null ? e2.getEventType() : "");
+                            break;
+                        case "priority":
+                            comparison = e1.getPriority().compareTo(e2.getPriority());
+                            break;
+                        case "status":
+                            comparison = (e1.getStatus() != null ? e1.getStatus() : "").compareTo(e2.getStatus() != null ? e2.getStatus() : "");
+                            break;
+                        case "parentapprovalstatus":
+                            comparison = e1.getParentApprovalStatus().compareTo(e2.getParentApprovalStatus());
+                            break;
+                        case "requireshomecare":
+                            Boolean homeCare1 = e1.getRequiresHomeCare() != null ? e1.getRequiresHomeCare() : false;
+                            Boolean homeCare2 = e2.getRequiresHomeCare() != null ? e2.getRequiresHomeCare() : false;
+                            comparison = homeCare1.compareTo(homeCare2);
+                            break;
+                        case "createdat":
+                            comparison = e1.getCreatedAt().compareTo(e2.getCreatedAt());
+                            break;
+                        case "updatedat":
+                            comparison = e1.getUpdatedAt().compareTo(e2.getUpdatedAt());
+                            break;
+                        case "studentname":
+                            comparison = e1.getStudent().getFullName().compareTo(e2.getStudent().getFullName());
+                            break;
+                        case "nursename":
+                            comparison = e1.getNurse().getFullName().compareTo(e2.getNurse().getFullName());
+                            break;
+                        default:
+                            comparison = e1.getCreatedAt().compareTo(e2.getCreatedAt());
+                            break;
+                    }
+                    
+                    return "desc".equalsIgnoreCase(sortDirection) ? -comparison : comparison;
+                })
+                .collect(Collectors.toList());
+    }
+
+    private List<HealthEvent> applyPagination(List<HealthEvent> events, HealthEventSearchRequest searchRequest) {
+        int page = searchRequest.getPage() != null ? searchRequest.getPage() : 0;
+        int size = searchRequest.getSize() != null ? searchRequest.getSize() : 20;
+        
+        int startIndex = page * size;
+        int endIndex = Math.min(startIndex + size, events.size());
+        
+        if (startIndex >= events.size()) {
+            return List.of();
+        }
+        
+        return events.subList(startIndex, endIndex);
     }
 
     private boolean determineHomeCareRequirement(HealthEvent event) {

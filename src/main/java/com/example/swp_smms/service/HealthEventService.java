@@ -2,6 +2,7 @@ package com.example.swp_smms.service;
 
 import com.example.swp_smms.model.payload.request.HealthEventRequest;
 import com.example.swp_smms.model.payload.request.HealthEventApprovalRequest;
+import com.example.swp_smms.model.payload.request.HealthEventSearchRequest;
 import com.example.swp_smms.model.payload.response.HealthEventResponse;
 import com.example.swp_smms.model.payload.response.HealthEventMedicationResponse;
 import com.example.swp_smms.model.payload.response.HealthEventApprovalResponse;
@@ -20,4 +21,5 @@ public interface HealthEventService {
     List<HealthEventResponse> getHealthEventsByPriority(String priority);
     List<HealthEventResponse> getHealthEventsPendingApproval(UUID parentId);
     List<HealthEventResponse> getHealthEventsByNurseId(UUID nurseId);
+    List<HealthEventResponse> searchHealthEvents(HealthEventSearchRequest searchRequest);
 }
