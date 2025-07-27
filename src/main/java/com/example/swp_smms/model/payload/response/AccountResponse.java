@@ -1,9 +1,16 @@
 package com.example.swp_smms.model.payload.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.UUID;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AccountResponse {
     private UUID accountId;
     private String username;
@@ -15,21 +22,4 @@ public class AccountResponse {
     private String email;
     private Boolean emailNotificationsEnabled;
     private String notificationTypes;
-
-    public AccountResponse(UUID accountId, String username, String fullName, String dob, String gender,
-                           String phone, Long roleId, String email,
-                           Boolean emailNotificationsEnabled, String notificationTypes) {
-        this.accountId = accountId;
-        this.username = username;
-        this.fullName = fullName;
-        this.dob = dob;
-        this.gender = gender;
-        this.phone = phone;
-        this.roleId = roleId;
-        this.email = email;
-        this.emailNotificationsEnabled = emailNotificationsEnabled;
-        this.notificationTypes = notificationTypes;
-    }
-
-    public AccountResponse() {}
 }

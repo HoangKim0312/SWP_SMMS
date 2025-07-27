@@ -2,17 +2,19 @@ package com.example.swp_smms.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.util.List;
 import java.util.UUID;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "account")
+@Getter
+@Setter
+@ToString(exclude = "medicalProfile") // Avoid infinite recursion
+@EqualsAndHashCode(exclude = "medicalProfile")
 public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
