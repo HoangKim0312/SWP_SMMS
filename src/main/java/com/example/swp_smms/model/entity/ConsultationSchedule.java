@@ -28,8 +28,8 @@ public class ConsultationSchedule {
     private Account parent;
 
     @ManyToOne
-    @JoinColumn(name = "staff_id", referencedColumnName = "account_id")
-    private Account staff;
+    @JoinColumn(name = "nurse_id", referencedColumnName = "account_id")
+    private Account nurse;
 
     @ManyToOne
     @JoinColumn(name = "health_check_record_id", referencedColumnName = "record_id")
