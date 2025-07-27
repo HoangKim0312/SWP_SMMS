@@ -118,4 +118,14 @@ public class HealthEventController {
                 medications
         );
     }
+
+    @GetMapping("/nurse/{nurseId}")
+    public ResponseEntity<Object> getHealthEventsByNurseId(@PathVariable UUID nurseId) {
+        List<HealthEventResponse> events = healthEventService.getHealthEventsByNurseId(nurseId);
+        return ResponseBuilder.responseBuilderWithData(
+                HttpStatus.OK,
+                "Health events for nurse retrieved successfully",
+                events
+        );
+    }
 }
