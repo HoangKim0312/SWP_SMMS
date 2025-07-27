@@ -138,7 +138,13 @@ public class HealthEventServiceImpl implements HealthEventService {
         
         // Handle scenario-based follow-up creation
         if (request.getFollowUp() != null || shouldCreateFollowUp(savedEvent)) {
-            createFollowUpForEvent(savedEvent, request.getFollowUp());
+            try {
+                createFollowUpForEvent(savedEvent, request.getFollowUp());
+            } catch (Exception e) {
+                // Log the error but don't fail the health event creation
+                System.err.println("Failed to create follow-up for health event " + savedEvent.getEventId() + ": " + e.getMessage());
+                // You might want to add proper logging here instead of System.err.println
+            }
         }
         
         // Map to response
@@ -389,7 +395,8 @@ public class HealthEventServiceImpl implements HealthEventService {
         List<StudentParent> studentParents = studentParentRepository.findByStudent_AccountId(event.getStudent().getAccountId());
         
         if (studentParents.isEmpty()) {
-            throw new RuntimeException("No parent found for student: " + event.getStudent().getFullName());
+            System.err.println("No parent found for student: " + event.getStudent().getFullName() + " (ID: " + event.getStudent().getAccountId() + ")");
+            return; // Don't throw exception, just return without creating follow-up
         }
         
         // Use the first parent (you might want to implement logic to choose the primary parent)
@@ -403,10 +410,22 @@ public class HealthEventServiceImpl implements HealthEventService {
             followUpRequest.setInstruction(generateFollowUpInstruction(event));
             followUpRequest.setRequiresDoctor(determineDoctorRequirement(event));
             followUpRequest.setStatus("PENDING");
+        } else {
+            // If follow-up request is provided, ensure it has the correct eventId and parentId
+            followUpRequest.setEventId(event.getEventId());
+            if (followUpRequest.getParentId() == null) {
+                followUpRequest.setParentId(studentParent.getParent().getAccountId());
+            }
         }
         
         // Create the follow-up
-        followUpService.createFollowUp(followUpRequest);
+        try {
+            followUpService.createFollowUp(followUpRequest);
+            System.out.println("Follow-up created successfully for health event: " + event.getEventId());
+        } catch (Exception e) {
+            System.err.println("Error creating follow-up: " + e.getMessage());
+            throw e; // Re-throw to be caught by the outer try-catch
+        }
     }
 
     private String generateFollowUpInstruction(HealthEvent event) {
