@@ -72,8 +72,16 @@ public class HealthEventServiceImpl implements HealthEventService {
             throw new RuntimeException("Nurse not exists or not a nurse");
         }
         
-        // Map request to entity
-        HealthEvent event = modelMapper.map(request, HealthEvent.class);
+        // Create health event entity manually to avoid ModelMapper issues
+        HealthEvent event = new HealthEvent();
+        event.setEventDate(request.getEventDate());
+        event.setEventType(request.getEventType());
+        event.setDescription(request.getDescription());
+        event.setSolution(request.getSolution());
+        event.setNote(request.getNote());
+        event.setStatus(request.getStatus());
+        event.setPriority(request.getPriority());
+        event.setRequiresHomeCare(request.getRequiresHomeCare());
         
         // Set student and nurse entities
         Account student = accountRepository.findAccountByAccountId(studentId);
