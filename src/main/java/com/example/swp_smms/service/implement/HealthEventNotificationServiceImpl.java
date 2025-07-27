@@ -138,7 +138,6 @@ public class HealthEventNotificationServiceImpl implements HealthEventNotificati
         if (healthEvent.getPriority().requiresParentApproval()) {
             content.append("\nAction Required:\n");
             content.append("This incident requires your approval. Please log into the system to review and approve/reject this medical incident.\n");
-            content.append("Login URL: ").append(SYSTEM_BASE_URL).append("/health-events/").append(healthEvent.getEventId()).append("/approve\n");
         }
         
         content.append("\nIf you have any questions, please contact the school nurse.\n\n");
@@ -162,8 +161,7 @@ public class HealthEventNotificationServiceImpl implements HealthEventNotificati
         }
         
         content.append("\nIMMEDIATE ACTION REQUIRED:\n");
-        content.append("Please log into the system immediately to review and approve this emergency medical incident.\n");
-        content.append("Emergency URL: ").append(SYSTEM_BASE_URL).append("/health-events/").append(healthEvent.getEventId()).append("/approve\n\n");
+        content.append("Please log into the system immediately to review and approve this emergency medical incident.\n\n");
         
         content.append("If you cannot access the system, please contact the school immediately.\n\n");
         content.append("Best regards,\nSchool Medical Management System");
@@ -182,8 +180,7 @@ public class HealthEventNotificationServiceImpl implements HealthEventNotificati
         content.append("- Type: ").append(healthEvent.getEventType()).append("\n");
         content.append("- Description: ").append(healthEvent.getDescription()).append("\n");
         
-        content.append("\nPlease review and approve now:\n");
-        content.append(SYSTEM_BASE_URL).append("/health-events/").append(healthEvent.getEventId()).append("/approve\n\n");
+        content.append("\nPlease review and approve now.\n\n");
         
         content.append("Best regards,\nSchool Medical Management System");
         

@@ -50,7 +50,7 @@ public class HealthEventFollowUpServiceImpl implements HealthEventFollowUpServic
             emailService != null) {
             String subject = "Follow-Up Instructions for Your Child";
             String body = String.format(
-                "Dear Parent,\n\nA follow-up has been created for your child regarding a recent medical incident at school.\n\nInstructions: %s\n\nPlease log in to your parent portal to acknowledge receipt and view more details.\n\nThank you,\nSchool Health Office",
+                "Dear Parent,\n\nA follow-up has been created for your child regarding a recent medical incident at school.\n\nInstructions: %s\n\nThank you,\nSchool Health Office",
                 request.getInstruction()
             );
             try {
