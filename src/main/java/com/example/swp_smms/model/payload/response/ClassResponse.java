@@ -1,6 +1,9 @@
 package com.example.swp_smms.model.payload.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 public class ClassResponse {

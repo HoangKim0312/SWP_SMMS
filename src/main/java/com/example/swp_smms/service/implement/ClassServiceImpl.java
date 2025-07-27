@@ -5,12 +5,14 @@ import com.example.swp_smms.model.payload.request.ClassRequest;
 import com.example.swp_smms.model.payload.response.ClassResponse;
 import com.example.swp_smms.repository.ClassRepository;
 import com.example.swp_smms.service.ClassService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -39,5 +41,15 @@ public class ClassServiceImpl implements ClassService {
                 .toList();
     }
 
+    @Override
+    public ClassResponse getClassByStudentId(UUID studentId) {
+        int currentYear = LocalDate.now().getYear();
+        Class clazz = classRepository.findClassByStudentId(studentId);
+
+        if (clazz == null) {
+            throw new EntityNotFoundException("Class not found for student ID: " + studentId);
+        }
+        return modelMapper.map(clazz, ClassResponse.class);
+    }
 
 }

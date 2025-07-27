@@ -88,7 +88,7 @@ public class VaccinationNoticeServiceImpl implements VaccinationNoticeService {
 
         // Step 3: Get eligible students (filtered by grade and active disease exclusions)
         List<Account> eligibleStudents = accountRepository.findEligibleStudentsForNotice(
-                request.getGrade(), excludedDiseaseIds);
+                request.getGrade(), excludedDiseaseIds, notice.getVaccineBatch().getVaccine().getVaccineId());
 
         // Step 4: Create confirmation form for all suitable students
         List<VaccinationConfirmation> confirmations = eligibleStudents.stream()

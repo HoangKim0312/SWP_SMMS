@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/classes")
@@ -26,6 +27,12 @@ public class ClassController {
     public ResponseEntity<List<ClassResponse>> getClassesByGrade(@RequestParam String grade) {
         List<ClassResponse> responses = classService.getClassesByGradeInCurrentYear(grade);
         return ResponseEntity.ok(responses);
+    }
+
+    @GetMapping("/by-student")
+    public ResponseEntity<ClassResponse> getClassByStudent(@RequestParam UUID studentId) {
+        ClassResponse response = classService.getClassByStudentId(studentId);
+        return ResponseEntity.ok(response);
     }
 
 

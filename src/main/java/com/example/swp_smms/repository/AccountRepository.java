@@ -54,10 +54,23 @@ public interface AccountRepository extends JpaRepository<Account, UUID>,CustomAc
           WHERE sd.medicalProfile = a.medicalProfile
             AND sd.disease.diseaseId IN :excludedDiseaseIds
             AND sd.active = true
-      )
+      )      
+        AND NOT EXISTS (
+            SELECT vr
+            FROM VaccinationRecord vr
+            WHERE vr.student.accountId = a.accountId
+            AND vr.vaccinationNotice.vaccineBatch.vaccine.vaccineId = :vaccineId
+            )
+        AND NOT EXISTS (
+            SELECT sev
+            FROM StudentExternalVaccine sev
+            WHERE sev.student.accountId = a.accountId
+            AND sev.vaccine.vaccineId = :vaccineId
+            )
     """)
     List<Account> findEligibleStudentsForNotice(@Param("grade") int grade,
-                                                @Param("excludedDiseaseIds") List<Long> excludedDiseaseIds);
+                                                @Param("excludedDiseaseIds") List<Long> excludedDiseaseIds,
+                                                @Param("vaccineId") Long vaccineId);
 
 
 
