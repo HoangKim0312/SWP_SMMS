@@ -158,16 +158,7 @@ public class HealthEventServiceImpl implements HealthEventService {
     public List<HealthEventResponse> viewAllHealthEvents() {
         List<HealthEvent> events = healthEventRepository.findAll();
         return events.stream()
-                .map(event -> {
-                    HealthEventResponse response = modelMapper.map(event, HealthEventResponse.class);
-                    response.setEventId(event.getEventId());
-                    response.setStudentID(event.getStudent().getAccountId());
-                    if (event.getNurse() != null) {
-                        response.setNurseID(event.getNurse().getAccountId());
-                    }
-                    response.setMedications(getMedicationsByHealthEvent(event.getEventId()));
-                    return response;
-                })
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -175,16 +166,7 @@ public class HealthEventServiceImpl implements HealthEventService {
     public List<HealthEventResponse> viewHealthEventsByDate(String eventDate) {
         List<HealthEvent> events = healthEventRepository.findByEventDate(eventDate);
         return events.stream()
-                .map(event -> {
-                    HealthEventResponse response = modelMapper.map(event, HealthEventResponse.class);
-                    response.setEventId(event.getEventId());
-                    response.setStudentID(event.getStudent().getAccountId());
-                    if (event.getNurse() != null) {
-                        response.setNurseID(event.getNurse().getAccountId());
-                    }
-                    response.setMedications(getMedicationsByHealthEvent(event.getEventId()));
-                    return response;
-                })
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -224,15 +206,7 @@ public class HealthEventServiceImpl implements HealthEventService {
             }
         }
 
-        HealthEventResponse response = modelMapper.map(updatedEvent, HealthEventResponse.class);
-        response.setEventId(updatedEvent.getEventId());
-        response.setStudentID(updatedEvent.getStudent().getAccountId());
-        if (updatedEvent.getNurse() != null) {
-            response.setNurseID(updatedEvent.getNurse().getAccountId());
-        }
-        response.setMedications(getMedicationsByHealthEvent(updatedEvent.getEventId()));
-
-        return response;
+        return mapToResponse(updatedEvent);
     }
 
     @Override
@@ -677,7 +651,9 @@ public class HealthEventServiceImpl implements HealthEventService {
         HealthEventResponse response = modelMapper.map(event, HealthEventResponse.class);
         response.setEventId(event.getEventId());
         response.setStudentID(event.getStudent().getAccountId());
+        response.setStudentName(event.getStudent().getFullName());
         response.setNurseID(event.getNurse().getAccountId());
+        response.setNurseName(event.getNurse().getFullName());
         response.setApprovedByParentID(event.getApprovedByParent() != null ? event.getApprovedByParent().getAccountId() : null);
         response.setApprovedByParentName(event.getApprovedByParent() != null ? event.getApprovedByParent().getFullName() : null);
         

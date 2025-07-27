@@ -18,7 +18,9 @@ public class HealthEventResponse {
     private String note;
     private String status;
     private UUID studentID;
+    private String studentName;
     private UUID nurseID;
+    private String nurseName;
     private HealthEventPriority priority;
     private HealthEventApprovalStatus parentApprovalStatus;
     private String parentApprovalReason;
