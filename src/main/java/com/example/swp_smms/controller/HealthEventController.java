@@ -4,6 +4,8 @@ import com.example.swp_smms.model.exception.ResponseBuilder;
 import com.example.swp_smms.model.payload.request.HealthEventRequest;
 import com.example.swp_smms.model.payload.request.HealthEventApprovalRequest;
 import com.example.swp_smms.model.payload.request.HealthEventSearchRequest;
+import com.example.swp_smms.model.enums.HealthEventPriority;
+import com.example.swp_smms.model.enums.HealthEventApprovalStatus;
 import com.example.swp_smms.model.payload.response.HealthEventResponse;
 import com.example.swp_smms.model.payload.response.HealthEventMedicationResponse;
 import com.example.swp_smms.model.payload.response.HealthEventApprovalResponse;
@@ -130,8 +132,59 @@ public class HealthEventController {
         );
     }
 
-    @PostMapping("/search")
-    public ResponseEntity<Object> searchHealthEvents(@RequestBody HealthEventSearchRequest searchRequest) {
+    @GetMapping("/search")
+    public ResponseEntity<Object> searchHealthEvents(
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(required = false) String eventType,
+            @RequestParam(required = false) String eventDate,
+            @RequestParam(required = false) String priority,
+            @RequestParam(required = false) String approvalStatus,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) Boolean requiresHomeCare,
+            @RequestParam(required = false) UUID studentId,
+            @RequestParam(required = false) UUID nurseId,
+            @RequestParam(required = false) UUID parentId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortDirection,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "20") Integer size) {
+        
+        // Build search request from query parameters
+        HealthEventSearchRequest searchRequest = new HealthEventSearchRequest();
+        searchRequest.setSearchTerm(searchTerm);
+        searchRequest.setEventType(eventType);
+        searchRequest.setEventDate(eventDate);
+        searchRequest.setStatus(status);
+        searchRequest.setRequiresHomeCare(requiresHomeCare);
+        searchRequest.setStudentId(studentId);
+        searchRequest.setNurseId(nurseId);
+        searchRequest.setParentId(parentId);
+        searchRequest.setStartDate(startDate);
+        searchRequest.setEndDate(endDate);
+        searchRequest.setSortBy(sortBy);
+        searchRequest.setSortDirection(sortDirection);
+        searchRequest.setPage(page);
+        searchRequest.setSize(size);
+        
+        // Convert string enums to actual enum values
+        if (priority != null && !priority.trim().isEmpty()) {
+            try {
+                searchRequest.setPriority(HealthEventPriority.valueOf(priority.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Invalid priority value, ignore it
+            }
+        }
+        
+        if (approvalStatus != null && !approvalStatus.trim().isEmpty()) {
+            try {
+                searchRequest.setApprovalStatus(HealthEventApprovalStatus.valueOf(approvalStatus.toUpperCase()));
+            } catch (IllegalArgumentException e) {
+                // Invalid approval status value, ignore it
+            }
+        }
+        
         List<HealthEventResponse> events = healthEventService.searchHealthEvents(searchRequest);
         return ResponseBuilder.responseBuilderWithData(
                 HttpStatus.OK,
