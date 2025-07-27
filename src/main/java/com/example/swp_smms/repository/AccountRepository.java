@@ -64,7 +64,8 @@ public interface AccountRepository extends JpaRepository<Account, UUID>,CustomAc
         AND NOT EXISTS (
             SELECT sev
             FROM StudentExternalVaccine sev
-            WHERE sev.student.accountId = a.accountId
+            WHERE sev.verified=true 
+            AND sev.student.accountId = a.accountId
             AND sev.vaccine.vaccineId = :vaccineId
             )
     """)
