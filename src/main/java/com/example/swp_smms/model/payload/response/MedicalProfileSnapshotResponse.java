@@ -22,6 +22,7 @@ public class MedicalProfileSnapshotResponse {
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
+    @Builder
     public static class SnapshotMedicalProfileDTO {
         private List<AllergySnapshotDTO> allergies;
         private List<DiseaseSnapshotDTO> diseases;
@@ -29,6 +30,9 @@ public class MedicalProfileSnapshotResponse {
         private BasicHealthDataDTO basicHealthData;
 
         @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @Builder
         public static class AllergySnapshotDTO {
             private Long studentAllergyId;
             private AllergenDTO allergen;
@@ -37,6 +41,9 @@ public class MedicalProfileSnapshotResponse {
             private boolean lifeThreatening;
 
             @Data
+            @NoArgsConstructor
+            @AllArgsConstructor
+            @Builder
             public static class AllergenDTO {
                 private Long allergenId;
                 private String name;
@@ -44,13 +51,19 @@ public class MedicalProfileSnapshotResponse {
         }
 
         @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @Builder
         public static class DiseaseSnapshotDTO {
             private Long id;
             private DiseaseDTO disease;
-            private LocalDate sinceDate;
+            private String sinceDate;
             private int severity;
 
             @Data
+            @NoArgsConstructor
+            @AllArgsConstructor
+            @Builder
             public static class DiseaseDTO {
                 private Long diseaseId;
                 private String name;
@@ -58,12 +71,18 @@ public class MedicalProfileSnapshotResponse {
         }
 
         @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @Builder
         public static class ConditionSnapshotDTO {
             private Long id;
             private ConditionDTO syndromeDisability;
             private String note;
 
             @Data
+            @NoArgsConstructor
+            @AllArgsConstructor
+            @Builder
             public static class ConditionDTO {
                 private Long conditionId;
                 private String name;
@@ -71,6 +90,9 @@ public class MedicalProfileSnapshotResponse {
         }
 
         @Data
+        @NoArgsConstructor
+        @AllArgsConstructor
+        @Builder
         public static class BasicHealthDataDTO {
             private Long id;
             private double heightCm;

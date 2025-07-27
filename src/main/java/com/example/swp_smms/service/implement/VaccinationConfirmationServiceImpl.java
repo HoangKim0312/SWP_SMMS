@@ -132,19 +132,21 @@ public class VaccinationConfirmationServiceImpl implements VaccinationConfirmati
     }
 
     private AccountResponse mapToAccountResponse(Account account) {
-        AccountResponse response = new AccountResponse();
-        response.setAccountId(account.getAccountId());
-        response.setUsername(account.getUsername());
-        response.setFullName(account.getFullName());
-        response.setDob(account.getDob());
-        response.setGender(account.getGender());
-        response.setPhone(account.getPhone());
-        response.setRoleId(account.getRole().getRoleId());
-        response.setEmail(account.getEmail());
-        response.setEmailNotificationsEnabled(account.getEmailNotificationsEnabled());
-        response.setNotificationTypes(account.getNotificationTypes());
-        return response;
+        return AccountResponse.builder()
+                .accountId(account.getAccountId())
+                .username(account.getUsername())
+                .fullName(account.getFullName())
+                .dob(account.getDob())
+                .gender(account.getGender())
+                .phone(account.getPhone())
+                .roleId(account.getRole() != null ? account.getRole().getRoleId() : null)
+                .email(account.getEmail())
+                .emailNotificationsEnabled(Boolean.TRUE.equals(account.getEmailNotificationsEnabled()))
+                .notificationTypes(account.getNotificationTypes() != null ? account.getNotificationTypes() : "")
+                .build();
     }
+
+
 
     @Override
     public List<VaccinationConfirmationResponse> confirmAllUpcomingNoticesForAllChildren(UUID parentId) {
