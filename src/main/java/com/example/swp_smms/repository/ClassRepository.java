@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ClassRepository extends JpaRepository<Class, Long> {
     boolean existsByClassName(String className);
@@ -15,5 +16,10 @@ public interface ClassRepository extends JpaRepository<Class, Long> {
     @Query("SELECT c FROM Class c WHERE c.grade = :grade AND c.schoolYear = :currentYear")
     List<Class> findByGradeAndCurrentYear(@Param("grade") String grade, @Param("currentYear") int currentYear);
 
-
+    @Query("""
+        SELECT a.clazz
+        FROM Account a
+        WHERE a.accountId = :studentId
+    """)
+    Class findClassByStudentId(@Param("studentId") UUID studentId);
 }
